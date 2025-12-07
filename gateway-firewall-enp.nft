@@ -1,0 +1,20 @@
+table inet filter {
+  chain output {
+    type filter hook output priority 0; policy drop;
+    oif lo accept
+    ct state established,related accept
+    oif enp0s5 skuid debian-tor accept
+    oif enp0s10 accept
+  }
+}
+table ip nat {
+  chain prerouting {
+    type nat hook prerouting priority -100; policy accept;
+    iif enp0s10 udp dport 53 redirect to :53
+    iif enp0s10 tcp flags syn redirect to :9040
+  }
+  chain postrouting {
+    type nat hook postrouting priority 100; policy accept;
+    oif enp0s5 masquerade
+  }
+}
