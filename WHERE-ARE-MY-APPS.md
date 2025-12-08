@@ -264,3 +264,46 @@ This searches ALL installed apps, even if menu categories are messed up.
 
 *Created: 2025-12-07 by OpenCode*
 *Last menu refresh: 2025-12-07 17:30*
+
+---
+
+## 🆕 UPDATE: Fixed Issues (2025-12-07 17:40)
+
+### ✅ Default Browser Fixed
+Firefox is now set as the default browser. Clicking web links will open Firefox.
+
+### ✅ GUI Text Editors Added
+
+**Geany** - The Notepad++ alternative for Linux!
+```bash
+geany &              # Launch Geany
+```
+
+**Features:**
+- Syntax highlighting for 50+ languages
+- Code folding
+- Auto-completion
+- Plugin support
+- Project management
+- Find/Replace with regex
+- Tabbed interface
+- Lightweight and fast
+
+**Also Available:**
+- **gedit** - Simple text editor (like Windows Notepad but better)
+  ```bash
+  gedit &
+  ```
+
+- **mousepad** - XFCE lightweight editor
+  ```bash
+  mousepad &
+  ```
+
+**Find them in menu:**
+- Applications → Accessories → Geany
+- Applications → Accessories → Text Editor (gedit/mousepad)
+
+---
+
+*Last updated: 2025-12-07 17:40 PST*
