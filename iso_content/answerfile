@@ -1,0 +1,23 @@
+# Automated Alpine installation for Tide Gateway
+KEYMAPOPTS="us us"
+HOSTNAMEOPTS="-n tide-gateway"
+INTERFACESOPTS="auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+    address 10.101.101.10
+    netmask 255.255.255.0
+"
+DNSOPTS="-d local"
+TIMEZONEOPTS="-z UTC"
+PROXYOPTS="none"
+APKREPOSOPTS="-1"
+SSHDOPTS="-c openssh"
+NTPOPTS="-c chrony"
+DISKOPTS="-m sys /dev/vda"
+USEROPTS="-u -g audio,video,netdev alpine"
+ROOTPASSWORD="tide"

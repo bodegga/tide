@@ -1,86 +1,174 @@
-# Tide 🌊
+# Tide Gateway - Universal Tor Appliance (ARM64)
 
-**Privacy gateway for ARM64**
+**Dead-simple, transparent Tor gateway for your VMs.**
 
-Transparent Tor proxy for Apple Silicon and ARM64 systems.
+Route all traffic from any VM through Tor with zero configuration inside the client. Just point your VM's gateway to Tide.
+
+## 🌊 Quick Start
+
+### Download
+
+Get the latest release from [GitHub Releases](https://github.com/anthonybiasi/opsec-vm/releases):
+- `tide-gateway.qcow2` - Pre-configured Alpine Linux disk image
+- `cloud-init.iso` - Auto-configuration seed (required for first boot)
+
+### Setup in UTM (Mac)
+
+1. **Create VM:** UTM → Create → Virtualize → Linux
+2. **Boot Disk:** Import `tide-gateway.qcow2`
+3. **CD/DVD:** Add `cloud-init.iso`
+4. **Network Adapter 1:** Shared Network (WAN - internet)
+5. **Network Adapter 2:** Host-Only (LAN - for your workstation)
+6. **Boot** and wait ~2 minutes for auto-configuration
+
+**Login:** `root` / `tide`
+
+### Setup in Parallels
+
+For Parallels, use the manual install method:
+
+1. Create a new Alpine Linux VM using the official ISO
+2. Run the quick setup script:
+   ```bash
+   wget -qO- https://raw.githubusercontent.com/anthonybiasi/opsec-vm/main/setup-tide.sh | sh
+   ```
+3. Configure network adapters (Shared + Host-Only)
+4. Reboot
 
 ---
 
-## Quick Start
+## 🔌 Client Configuration
 
-**Download:**
+Connect any VM (Kali, Ubuntu, Windows) to the **same Host-Only network** as Tide's LAN adapter.
+
+**Inside the client OS:**
+
+| Setting | Value |
+|---------|-------|
+| IP Address | `10.101.101.20` (or .11-.99) |
+| Subnet Mask | `255.255.255.0` |
+| Gateway | `10.101.101.10` |
+| DNS Server | `10.101.101.10` |
+| IPv6 | **Disabled** |
+
+### Verify Tor Connection
+
+Open a browser in the client and go to: https://check.torproject.org
+
+You should see: **"Congratulations. This browser is configured to use Tor."**
+
+---
+
+## 📡 Gateway Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Transparent Proxy** | 9040 | Auto-routes all TCP traffic |
+| **DNS** | 5353 | Resolves through Tor |
+| **SOCKS5** | 9050 | Manual proxy option |
+| **SSH** | 22 | Administration |
+
+---
+
+## 🔧 Administration
+
+- **Gateway IP:** `10.101.101.10`
+- **Login:** `root` / `tide`
+- **SSH:** `ssh root@10.101.101.10` (from LAN)
+- **Tor Config:** `/etc/tor/torrc`
+- **Firewall:** `iptables -L -n -v`
+- **Tor Status:** `rc-service tor status`
+
+### Useful Commands
+
 ```bash
-curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
+# Check Tor status
+rc-service tor status
+
+# View Tor logs
+tail -f /var/log/messages | grep -i tor
+
+# Restart Tor (get new circuit)
+rc-service tor restart
+
+# Check iptables rules
+iptables -L -n -v -t nat
 ```
 
-**Extract & Import:**
-```bash
-tar -xzf tide-gateway-v1.0-arm64.tar.gz -C ~/Parallels/
-prlctl register ~/Parallels/Tor-Gateway.pvm
-prlctl start Tor-Gateway
-```
-
-**Gateway IP:** `10.152.152.10`
-
 ---
 
-## Features
+## 🏗️ Building from Source
 
-- ✅ Tor transparent proxy (all traffic protected)
-- ✅ DNS leak prevention
-- ✅ .onion support built-in
-- ✅ Fail-closed firewall
-- ✅ ~1GB download, ~500MB RAM usage
-
----
-
-## Workstation Setup
-
-Configure your VM to route through the gateway:
+### Prerequisites
 
 ```bash
-# /etc/network/interfaces
-auto eth0
-iface eth0 inet static
-    address 10.152.152.11
-    netmask 255.255.255.0
-    gateway 10.152.152.10
-    dns-nameservers 10.152.152.10
+# macOS
+brew install qemu cdrtools
 ```
 
-Verify:
+### Build Release Artifacts
+
 ```bash
-curl https://check.torproject.org/api/ip
-# Should return: {"IsTor":true}
+git clone https://github.com/anthonybiasi/opsec-vm.git
+cd opsec-vm
+
+# Download Alpine cloud image (one-time)
+wget https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/nocloud_alpine-3.19.6-aarch64-uefi-tiny-r0.qcow2
+
+# Build release
+./build-release.sh
+```
+
+Output in `release/`:
+- `tide-gateway.qcow2` - Gateway disk image
+- `cloud-init.iso` - Configuration seed
+- `tide-autoinstall-efi.iso` - Fresh install ISO (optional)
+
+### Test with QEMU
+
+```bash
+./run-tide-qemu.sh fresh
 ```
 
 ---
 
-## Supported Platforms
+## 📁 Project Structure
 
-- Parallels Desktop
-- UTM (free, open source)
-- VMware Fusion
-- VirtualBox
-- QEMU/KVM
-
-Works on any ARM64 hypervisor.
-
----
-
-## Build Your Own
-
-See [docs/BUILD.md](docs/BUILD.md) for building from source.
-
----
-
-## Support
-
-- [Issues](https://github.com/bodegga/tide/issues)
-- [Discussions](https://github.com/bodegga/tide/discussions)
+```
+opsec-vm/
+├── release/                    # Release artifacts
+│   ├── tide-gateway.qcow2      # Gateway disk
+│   ├── cloud-init.iso          # Auto-config seed
+│   └── tide-autoinstall-efi.iso
+├── build-release.sh            # Main build script
+├── run-tide-qemu.sh            # QEMU test runner
+├── setup-tide.sh               # Manual setup script
+├── cloud-init-userdata.yaml    # Cloud-init config source
+└── docs/                       # Additional documentation
+```
 
 ---
 
-**License:** MIT
+## ⚠️ Security Notes
 
-Open source. Free forever.
+- **Default password is `tide`** - Change in production!
+- Root SSH login is enabled for convenience - disable if not needed
+- All traffic from the LAN is transparently routed through Tor
+- IPv6 is disabled to prevent leaks
+- The gateway itself uses DHCP on eth0 for internet access
+
+---
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE)
+
+---
+
+## 🤝 Contributing
+
+Issues and PRs welcome! See the build documentation in `docs/BUILD.md`.
+
+---
+
+**Petaluma Pride 🌊 | Built with Alpine Linux + Tor**

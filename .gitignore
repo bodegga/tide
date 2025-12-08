@@ -1,3 +1,32 @@
-_dev-archive/
+# macOS
 .DS_Store
 *.log
+
+# Development artifacts (not for release)
+_dev-archive/
+cidata/
+
+# Large binary files (download separately or use git-lfs)
+*.qcow2
+*.vhd
+*.vmdk
+*.iso
+*.img
+*.hdd/
+*.raw
+*.ova
+*.ovf
+*.mf
+*.vmx
+*.tar.gz
+
+# Keep release folder tracked via exception below
+!release/
+
+# Test files
+test-*.qcow2
+alpine-*.qcow2
+
+# Temporary files
+/tmp/
+*.tmp

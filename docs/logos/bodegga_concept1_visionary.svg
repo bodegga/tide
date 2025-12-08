@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Concept 1: The Visionary Egg (Eye/Egg Hybrid) -->
+  <defs>
+    <style>
+      .bg { fill: none; }
+      .shell { fill: #1A1A1A; }
+      .iris { fill: #00C2C7; }
+      .pupil { fill: #1A1A1A; }
+      .highlight { fill: #FFFFFF; opacity: 0.1; }
+    </style>
+  </defs>
+
+  <!-- The Egg Silhouette (Vertical) -->
+  <path d="M256 64 C 160 64, 96 160, 96 288 C 96 400, 160 448, 256 448 C 352 448, 416 400, 416 288 C 416 160, 352 64, 256 64 Z" class="shell" />
+
+  <!-- The "Eye" Aperture (Negative Space & Iris) -->
+  <!-- White cutout to form the eye shape inside the egg -->
+  <path d="M126 288 Q 256 200, 386 288 Q 256 376, 126 288 Z" fill="#ffffff" />
+  
+  <!-- The Iris (Electric Teal) -->
+  <circle cx="256" cy="288" r="50" class="iris" />
+  
+  <!-- The Pupil (Charcoal) -->
+  <circle cx="256" cy="288" r="20" class="pupil" />
+
+  <!-- Subtle Geometric Accent (Warm Sand - Petaluma Earth) -->
+  <rect x="246" y="400" width="20" height="4" fill="#D7C6A3" />
+
+</svg>

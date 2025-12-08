@@ -1,0 +1,17 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Icon: The Ripple -->
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#00C2C7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003366;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+
+  <!-- Concentric Rings -->
+  <circle cx="128" cy="128" r="100" fill="none" stroke="#003366" stroke-width="20" opacity="0.2" />
+  <circle cx="128" cy="128" r="70" fill="none" stroke="#003366" stroke-width="15" opacity="0.6" />
+  <circle cx="128" cy="128" r="40" fill="none" stroke="#00C2C7" stroke-width="10" />
+  
+  <!-- Center Dot -->
+  <circle cx="128" cy="128" r="15" fill="#1A1A1A" />
+</svg>

@@ -1,0 +1,33 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Software Mark: The Data Wave -->
+  <defs>
+    <style>
+      .bar { fill: #003366; } 
+      .cap { fill: #00C2C7; }
+    </style>
+  </defs>
+
+  <!-- Abstract Wave formed by Data Bars -->
+  <!-- Bar 1 -->
+  <rect x="106" y="250" width="40" height="100" rx="4" class="bar" />
+  <rect x="106" y="230" width="40" height="15" rx="2" class="cap" />
+
+  <!-- Bar 2 -->
+  <rect x="166" y="200" width="40" height="150" rx="4" class="bar" />
+  <rect x="166" y="180" width="40" height="15" rx="2" class="cap" />
+
+  <!-- Bar 3 (Peak) -->
+  <rect x="226" y="150" width="40" height="200" rx="4" class="bar" />
+  <rect x="226" y="130" width="40" height="15" rx="2" class="cap" />
+
+  <!-- Bar 4 -->
+  <rect x="286" y="180" width="40" height="170" rx="4" class="bar" />
+  <rect x="286" y="160" width="40" height="15" rx="2" class="cap" />
+  
+  <!-- Bar 5 -->
+  <rect x="346" y="240" width="40" height="110" rx="4" class="bar" />
+  <rect x="346" y="220" width="40" height="15" rx="2" class="cap" />
+
+  <!-- Base Line -->
+  <rect x="80" y="370" width="352" height="10" rx="2" fill="#1A1A1A" opacity="0.2"/>
+</svg>
