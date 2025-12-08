@@ -1,71 +1,59 @@
-# TYPE THESE COMMANDS IN GATEWAY CONSOLE
+# Type This Into Alpine Gateway
 
-**Since you can't paste, type these commands manually in the Tor-Gateway console**
+**After Alpine is installed and you've rebooted, login as root and type:**
 
----
+```sh
+cat > /tmp/s.sh << 'SCRIPT'
+cat >> /etc/network/interfaces << 'NET'
 
-## OPTION 1: Download Fix Script (Easiest - 3 commands)
-
-```bash
-wget http://10.152.152.11:8000/tor-fix.sh
-chmod +x tor-fix.sh
-sudo ./tor-fix.sh
-```
-
-That's it! The script is hosted on your Workstation.
-
----
-
-## OPTION 2: Type Manually (If wget doesn't work)
-
-**Type this command by command:**
-
-```bash
-sudo nano /etc/tor/torrc
-```
-
-**Scroll to bottom (arrow keys), add these 4 lines:**
-
-```
+auto eth1
+iface eth1 inet static
+    address 10.152.152.10
+    netmask 255.255.255.0
+NET
+ifup eth1
+echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
+echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf
+sysctl -p
+apk add tor iptables ip6tables
+cat > /etc/tor/torrc << 'TOR'
+SocksPort 10.152.152.10:9050
+DNSPort 10.152.152.10:5353
+TransPort 10.152.152.10:9040
+VirtualAddrNetworkIPv4 10.192.0.0/10
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .onion
-VirtualAddrNetworkIPv4 10.192.0.0/10
-VirtualAddrNetworkIPv6 [FC00::]/7
+Log notice file /var/log/tor/notices.log
+TOR
+mkdir -p /var/log/tor
+chown tor:tor /var/log/tor
+chmod 700 /var/log/tor
+cat > /etc/iptables/rules-save << 'FW'
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A PREROUTING -i eth1 -p udp --dport 53 -j REDIRECT --to-ports 5353
+-A PREROUTING -i eth1 -p tcp --syn -j REDIRECT --to-ports 9040
+COMMIT
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -i eth1 -s 10.152.152.0/24 -p tcp -m multiport --dports 9050,9040,22,9051 -j ACCEPT
+-A INPUT -i eth1 -s 10.152.152.0/24 -p udp --dport 5353 -j ACCEPT
+COMMIT
+FW
+iptables-restore < /etc/iptables/rules-save
+rc-update add tor
+rc-update add iptables
+rc-service tor start
+tail -f /var/log/tor/notices.log
+SCRIPT
+sh /tmp/s.sh
 ```
 
-**Save:** Ctrl+O, Enter, Ctrl+X
-
-**Restart Tor:**
-
-```bash
-sudo systemctl restart tor
-```
-
----
-
-## OPTION 3: One-Line Copy (Type this if you can)
-
-```bash
-echo "AutomapHostsOnResolve 1" | sudo tee -a /etc/tor/torrc
-echo "AutomapHostsSuffixes .onion" | sudo tee -a /etc/tor/torrc  
-echo "VirtualAddrNetworkIPv4 10.192.0.0/10" | sudo tee -a /etc/tor/torrc
-echo "VirtualAddrNetworkIPv6 [FC00::]/7" | sudo tee -a /etc/tor/torrc
-sudo systemctl restart tor
-```
-
----
-
-## ✅ After Running Any Option:
-
-Check it worked:
-```bash
-sudo systemctl status tor
-```
-
-Should show `active (running)`.
-
-Then test .onion in Firefox on Workstation!
-
----
-
-**Try Option 1 first (wget). It's only 3 short commands to type!**
+That's it. One paste. Done.
