@@ -205,7 +205,7 @@ Want to build your own gateway? See [BUILD.md](BUILD.md) for instructions.
 
 ## About
 
-**Tide** is built by [Bodegga](https://bodegga.net), a Petaluma, California-based software company.
+**Tide** is built by [Bodegga](https://tide.bodegga.net), a Petaluma, California-based software company.
 
 Like the Petaluma River's tide that ebbs and flows—revealing and concealing the riverbed—Tide protects your digital footprint, leaving no trace behind.
 
@@ -231,3 +231,24 @@ MIT License - See [LICENSE](LICENSE) for details
 **A Bodegga product**
 
 Privacy for everyone. Free forever.
+
+## Quick Install
+
+**One-liner:**
+```bash
+curl -sSL https://tide.bodegga.net/install.sh | bash
+```
+
+Or manual:
+```bash
+curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
+tar -xzf tide-gateway-v1.0-arm64.tar.gz -C ~/Parallels/
+prlctl register ~/Parallels/Tor-Gateway.pvm
+prlctl start Tor-Gateway
+```
+
+---
+
+**Website:** https://tide.bodegga.net  
+**GitHub:** https://github.com/bodegga/tide  
+**Download:** https://github.com/bodegga/tide/releases/latest
