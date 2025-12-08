@@ -336,3 +336,28 @@ xfce4-panel -r
 *Created: 2025-12-07 by OpenCode*
 *Architecture: Whonix-style Tor Gateway isolation*
 *Current Tor Exit IP: 185.220.101.186*
+
+---
+
+## ✅ FIXED: Tor Conflict Resolved (2025-12-07 17:35)
+
+### Problem
+- .onion sites weren't loading in Firefox
+- Tor daemon was installed on BOTH Gateway AND Workstation
+- This created a "double-Tor" conflict
+
+### Solution
+- Removed Tor packages from Workstation: `tor`, `tor-geoipdb`, `torsocks`
+- Now Workstation ONLY routes through Gateway (correct architecture)
+
+### Verified Working
+```bash
+curl https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion
+# Successfully returned DuckDuckGo .onion site HTML ✅
+```
+
+**Status:** ✅ Dark web access fully functional
+
+---
+
+*Fixed: 2025-12-07 17:35 PST*
