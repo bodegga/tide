@@ -1,24 +1,47 @@
-# Building Tide
+# Building Tide from Source
 
 ## Goal
-Lightweight Tor gateway that works on ANY ARM64 hypervisor.
 
-## Best Approach: Alpine Linux
+Lightweight, universal Tor gateway for ARM64 systems.
 
-**Why:** 150MB vs 3GB (Debian). Minimal, fast, secure.
+## Recommended: Alpine Linux
 
-## Steps
+**Why:** 150MB footprint vs 3GB (Debian). Minimal attack surface.
 
-1. Download Alpine ARM64 ISO
-2. Create VM (512MB RAM, 2GB disk, 2 network adapters)
-3. Install Alpine (`setup-alpine`)
-4. Configure Tor + firewall
-5. Export as universal OVA
+### Requirements
+- ARM64 system (Apple Silicon, ARM server, etc.)
+- Hypervisor (Parallels, UTM, VMware, VirtualBox, KVM)
+- Alpine Linux ARM64 ISO
 
-Full automation scripts in development.
+### Build Steps
+
+1. **Create VM**
+   - 512MB RAM
+   - 2GB disk
+   - 2 network adapters (Shared + Host-Only)
+
+2. **Install Alpine**
+   ```bash
+   setup-alpine
+   ```
+
+3. **Configure Tor**
+   ```bash
+   apk add tor iptables
+   # Configure /etc/tor/torrc
+   # Configure firewall rules
+   ```
+
+4. **Export**
+   - Export as OVA for universal compatibility
+   - Test on multiple hypervisors
 
 ## Current Release
 
-v1.0.0 uses Debian (tested, working, stable).
+v1.0.0 uses Debian (tested, stable, working).
 
-Alpine version coming soon.
+Alpine version in development.
+
+---
+
+**Contributions welcome!**

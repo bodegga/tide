@@ -2,9 +2,7 @@
 
 **Privacy gateway for ARM64**
 
-Routes all traffic through Tor. Works on any ARM64 hypervisor.
-
-Built by [Bodegga](https://bodegga.net). Made in Petaluma, CA.
+Transparent Tor proxy for Apple Silicon and ARM64 systems.
 
 ---
 
@@ -26,7 +24,7 @@ prlctl start Tor-Gateway
 
 ---
 
-## What You Get
+## Features
 
 - ✅ Tor transparent proxy (all traffic protected)
 - ✅ DNS leak prevention
@@ -38,7 +36,7 @@ prlctl start Tor-Gateway
 
 ## Workstation Setup
 
-Point your VM to the gateway:
+Configure your VM to route through the gateway:
 
 ```bash
 # /etc/network/interfaces
@@ -50,7 +48,7 @@ iface eth0 inet static
     dns-nameservers 10.152.152.10
 ```
 
-Test:
+Verify:
 ```bash
 curl https://check.torproject.org/api/ip
 # Should return: {"IsTor":true}
@@ -66,15 +64,13 @@ curl https://check.torproject.org/api/ip
 - VirtualBox
 - QEMU/KVM
 
-All ARM64 hypervisors supported.
+Works on any ARM64 hypervisor.
 
 ---
 
 ## Build Your Own
 
-Want Alpine instead of Debian? Smaller footprint?
-
-See [docs/BUILD.md](docs/BUILD.md)
+See [docs/BUILD.md](docs/BUILD.md) for building from source.
 
 ---
 
@@ -85,7 +81,6 @@ See [docs/BUILD.md](docs/BUILD.md)
 
 ---
 
-**Website:** [tide.bodegga.net](https://tide.bodegga.net)  
 **License:** MIT
 
-Privacy flows naturally. 🌊
+Open source. Free forever.
