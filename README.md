@@ -37,7 +37,7 @@ Tide is a transparent Tor proxy gateway that routes all your internet traffic th
 
 1. **Download** the latest release:
    ```bash
-   curl -LO https://github.com/anthonybiasi/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
+   curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
    ```
 
 2. **Extract** to Parallels directory:
@@ -221,8 +221,8 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/anthonybiasi/tide/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/anthonybiasi/tide/discussions)
+- **Issues:** [GitHub Issues](https://github.com/bodegga/tide/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/bodegga/tide/discussions)
 - **Security:** Report vulnerabilities via GitHub Security Advisories
 
 ---
