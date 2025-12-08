@@ -1,211 +1,194 @@
 #!/bin/sh
+# Tide Gateway - One-Command Installer
+# =====================================
+# Boot Alpine Linux ISO, login as root, then run:
+#   wget -qO- tide.sh | sh
+#   OR
+#   wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
+#
+# This will install Alpine to disk and configure as Tor gateway.
+# After reboot: Login root/tide, Gateway at 10.101.101.10
 
-# Tide Gateway - Universal "Brute Force" Installer
-# ------------------------------------------------
-# This script runs automatically from the ISO.
-# It detects the target disk, wipes it, installs Alpine + Tor Gateway, and reboots.
-# No prompts. No waiting.
+set -e
 
-exec >/dev/console 2>&1
-set -x
-
+echo ""
 echo "=========================================="
-echo "   TIDE GATEWAY: UNIVERSAL INSTALLER      "
+echo "   TIDE GATEWAY INSTALLER"  
 echo "=========================================="
-sleep 3
+echo ""
 
-# 1. Detect Target Disk (NVMe or VirtIO)
-TARGET_DISK=""
-for disk in /dev/vda /dev/sda /dev/nvme0n1; do
-    if [ -b "$disk" ]; then
-        TARGET_DISK="$disk"
-        break
-    fi
-done
-
-if [ -z "$TARGET_DISK" ]; then
-    echo "!!! ERROR: No suitable target disk found (vda, sda, nvme0n1)."
+# Verify we're in Alpine
+if [ ! -f /etc/alpine-release ]; then
+    echo "ERROR: Run this from Alpine Linux live environment"
     exit 1
 fi
 
-echo ">>> Target Disk Detected: $TARGET_DISK"
-echo ">>> Wiping and Partitioning..."
-
-# Ensure tools are present
-apk add --no-cache e2fsprogs parted dosfstools util-linux
-
-# Wipe partition table
-dd if=/dev/zero of=$TARGET_DISK bs=1M count=10
-
-# Create partitions:
-# 1. EFI System Partition (100MB)
-# 2. Swap (512MB)
-# 3. Root (Remaining)
-parted -s $TARGET_DISK mklabel gpt
-parted -s $TARGET_DISK mkpart primary fat32 1MiB 101MiB
-parted -s $TARGET_DISK set 1 esp on
-parted -s $TARGET_DISK mkpart primary linux-swap 101MiB 613MiB
-parted -s $TARGET_DISK mkpart primary ext4 613MiB 100%
-
-# Wait for device nodes
-mdev -s
-sleep 2
-
-# Identify partitions (handling nvme naming p1/p2 vs vda1/vda2)
-if echo "$TARGET_DISK" | grep -q "nvme"; then
-    PART_EFI="${TARGET_DISK}p1"
-    PART_SWAP="${TARGET_DISK}p2"
-    PART_ROOT="${TARGET_DISK}p3"
-else
-    PART_EFI="${TARGET_DISK}1"
-    PART_SWAP="${TARGET_DISK}2"
-    PART_ROOT="${TARGET_DISK}3"
-fi
-
-echo ">>> Formatting..."
-mkfs.vfat -F32 "$PART_EFI"
-mkswap "$PART_SWAP"
-mkfs.ext4 -F "$PART_ROOT"
-
-# Mount Target
-mkdir -p /mnt
-mount "$PART_ROOT" /mnt
-mkdir -p /mnt/boot/efi
-mount "$PART_EFI" /mnt/boot/efi
-
-echo ">>> Installing System (Base + Tor + Kernel)..."
-# Setup repositories
-mkdir -p /mnt/etc/apk
-echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/main" > /mnt/etc/apk/repositories
-echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /mnt/etc/apk/repositories
-
-# Install packages into /mnt
-apk add --root /mnt --initdb --no-cache \
-    alpine-base linux-virt mkinitfs \
-    grub-efi efibootmgr \
-    tor iptables ip6tables \
-    openssh openrc \
-    util-linux e2fsprogs
-
-echo ">>> Configuring System..."
-
-# 1. Bootloader (GRUB EFI)
-# We need to install GRUB from within the chroot or using host tools mapped to target
-# Doing it via chroot is safer for paths
-mount -t proc /proc /mnt/proc
-mount -t sysfs /sys /mnt/sys
-mount -t devtmpfs /dev /mnt/dev
-
-cat <<EOF > /mnt/install_boot.sh
-#!/bin/sh
-grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=alpine --recheck --no-nvram --removable
-grub-mkconfig -o /boot/grub/grub.cfg
-EOF
-chmod +x /mnt/install_boot.sh
-chroot /mnt /bin/sh /install_boot.sh
-
-# 2. Network Configuration (Static 10.101.101.10)
-cat <<EOF > /mnt/etc/network/interfaces
+# Setup networking
+echo ">>> Configuring network..."
+cat > /tmp/interfaces <<'EOF'
 auto lo
 iface lo inet loopback
 
 auto eth0
 iface eth0 inet dhcp
+EOF
+cp /tmp/interfaces /etc/network/interfaces
+rc-service networking restart 2>/dev/null || ifup eth0
+
+# Wait for network
+echo ">>> Waiting for network..."
+for i in 1 2 3 4 5; do
+    ping -c1 -W2 dl-cdn.alpinelinux.org >/dev/null 2>&1 && break
+    sleep 2
+done
+
+if ! ping -c1 -W2 dl-cdn.alpinelinux.org >/dev/null 2>&1; then
+    echo "ERROR: No network. Check your connection."
+    exit 1
+fi
+echo ">>> Network OK"
+
+# Find target disk
+DISK=""
+for d in /dev/sda /dev/vda /dev/nvme0n1; do
+    [ -b "$d" ] && DISK="$d" && break
+done
+[ -z "$DISK" ] && echo "ERROR: No disk found" && exit 1
+echo ">>> Target disk: $DISK"
+
+# Confirm
+echo ""
+echo "WARNING: This will ERASE $DISK"
+echo "Press Enter to continue or Ctrl-C to cancel..."
+read dummy
+
+# Install Alpine to disk
+echo ">>> Installing Alpine to $DISK..."
+export ERASE_DISKS="$DISK"
+
+# Use setup-alpine with answers piped in
+setup-alpine -q <<EOF
+us
+us
+tide-gateway
+eth0
+dhcp
+no
+tide
+tide
+UTC
+none
+1
+openssh
+chrony
+$DISK
+sys
+y
+EOF
+
+echo ""
+echo ">>> Base system installed. Configuring Tide Gateway..."
+
+# Mount installed system
+if echo "$DISK" | grep -q nvme; then
+    ROOT="${DISK}p3"
+else
+    ROOT="${DISK}3"
+fi
+mount "$ROOT" /mnt 2>/dev/null || mount "${DISK}2" /mnt
+
+# Install Tor and iptables
+echo ">>> Installing Tor..."
+chroot /mnt apk add --no-cache tor iptables ip6tables
+
+# Configure Tor
+echo ">>> Configuring Tor..."
+cat > /mnt/etc/tor/torrc <<'TORRC'
+User tor
+DataDirectory /var/lib/tor
+SocksPort 0.0.0.0:9050
+DNSPort 0.0.0.0:5353
+TransPort 0.0.0.0:9040
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+Log notice syslog
+TORRC
+
+# Add eth1 (LAN) to network config
+echo ">>> Configuring LAN interface..."
+cat >> /mnt/etc/network/interfaces <<'NET'
 
 auto eth1
 iface eth1 inet static
     address 10.101.101.10
     netmask 255.255.255.0
-EOF
+NET
 
-# 3. Services
-# We can't use rc-update in chroot easily without openrc softlevel, so we link manually
-ln -s /etc/init.d/networking /mnt/etc/runlevels/boot/networking
-ln -s /etc/init.d/sshd /mnt/etc/runlevels/default/sshd
-ln -s /etc/init.d/tor /mnt/etc/runlevels/default/tor
-ln -s /etc/init.d/iptables /mnt/etc/runlevels/default/iptables
+# Sysctl for forwarding
+mkdir -p /mnt/etc/sysctl.d
+cat > /mnt/etc/sysctl.d/tide.conf <<'SYSCTL'
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.disable_ipv6 = 1
+SYSCTL
 
-# 4. Tor Config
-cat <<EOF > /mnt/etc/tor/torrc
-User tor
-DataDirectory /var/lib/tor
-
-# Transparent Proxy (TransPort) for traffic
-TransPort 0.0.0.0:9040
-DNSPort 0.0.0.0:5353
-
-# SOCKS5 Proxy
-SocksPort 0.0.0.0:9050
-
-# Circuit settings
-VirtualAddrNetworkIPv4 10.192.0.0/10
-AutomapHostsOnResolve 1
-EOF
-
-# 5. IP Tables (Tide routing)
-cat <<EOF > /mnt/etc/iptables/rules-save
+# IPTables rules
+mkdir -p /mnt/etc/iptables
+cat > /mnt/etc/iptables/rules-save <<'IPTABLES'
 *nat
 :PREROUTING ACCEPT [0:0]
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
-
-# Redirect DNS to Tor
 -A PREROUTING -i eth1 -p udp --dport 53 -j REDIRECT --to-ports 5353
 -A PREROUTING -i eth1 -p tcp --dport 53 -j REDIRECT --to-ports 5353
-
-# Redirect TCP traffic to Tor TransPort
 -A PREROUTING -i eth1 -p tcp --syn -j REDIRECT --to-ports 9040
-
-# Masquerade outbound (if we allow non-Tor traffic, usually we don't for strict opsec)
-# For now, we only pass through Tor.
 COMMIT
-
 *filter
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
-
-# Allow loopback
 -A INPUT -i lo -j ACCEPT
-
-# Allow established
--A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-
-# Allow SSH from internal net
--A INPUT -i eth1 -p tcp --dport 22 -j ACCEPT
-
-# Allow DNS/TransPort inputs from internal net
--A INPUT -i eth1 -p udp --dport 5353 -j ACCEPT
--A INPUT -i eth1 -p tcp --dport 9040 -j ACCEPT
--A INPUT -i eth1 -p tcp --dport 9050 -j ACCEPT
-
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 9050 -j ACCEPT
+-A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 9040 -j ACCEPT
+-A INPUT -i eth1 -s 10.101.101.0/24 -p udp --dport 5353 -j ACCEPT
+-A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 22 -j ACCEPT
+-A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT
 COMMIT
-EOF
+IPTABLES
 
-# 6. User Setup (root:tide)
-# Set root password to 'tide'
-echo "root:tide" | chroot /mnt chpasswd
-# Allow root login for now (convenience)
-sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /mnt/etc/ssh/sshd_config
+# Enable services
+echo ">>> Enabling services..."
+chroot /mnt rc-update add tor default
+chroot /mnt rc-update add iptables default
 
-# 7. fstab
-UUID_ROOT=\$(blkid -s UUID -o value $PART_ROOT)
-UUID_EFI=\$(blkid -s UUID -o value $PART_EFI)
-UUID_SWAP=\$(blkid -s UUID -o value $PART_SWAP)
+# Create iptables loader
+cat > /mnt/etc/local.d/iptables.start <<'IPTLOAD'
+#!/bin/sh
+iptables-restore < /etc/iptables/rules-save 2>/dev/null || true
+sysctl -p /etc/sysctl.d/tide.conf 2>/dev/null || true
+IPTLOAD
+chmod +x /mnt/etc/local.d/iptables.start
+chroot /mnt rc-update add local default
 
-cat <<EOF > /mnt/etc/fstab
-UUID=\$UUID_ROOT / ext4 rw,relatime 0 1
-UUID=\$UUID_EFI /boot/efi vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2
-UUID=\$UUID_SWAP none swap sw 0 0
-EOF
+# Enable root SSH (already set by setup-alpine, but ensure it)
+sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /mnt/etc/ssh/sshd_config
 
-# 8. Branding
-echo "Tide Gateway v1.0" > /mnt/etc/issue
+# Done
+echo "Tide Gateway installed $(date)" > /mnt/root/INSTALL_COMPLETE
 
+sync
+umount /mnt 2>/dev/null || true
+
+echo ""
 echo "=========================================="
-echo "   INSTALLATION COMPLETE.                 "
-echo "   Powering off in 5 seconds...           "
+echo "   INSTALLATION COMPLETE!"
 echo "=========================================="
-sleep 5
-poweroff
+echo ""
+echo "   1. Remove the ISO from the VM"
+echo "   2. Reboot: reboot"
+echo ""
+echo "   Login:    root / tide"
+echo "   Gateway:  10.101.101.10"
+echo ""
+echo "=========================================="
