@@ -23,17 +23,25 @@ Get the latest release from [GitHub Releases](https://github.com/anthonybiasi/op
 
 **Login:** `root` / `tide`
 
-### Setup in Parallels
+### Setup in Parallels (Mac)
 
-For Parallels, use the manual install method:
+Parallels requires a fresh Alpine install (the qcow2 format isn't directly compatible):
 
-1. Create a new Alpine Linux VM using the official ISO
-2. Run the quick setup script:
+```bash
+# Run the automated builder (downloads Alpine ISO, creates VM)
+./build-parallels.sh
+```
+
+Then in the Parallels console:
+1. Login as `root` (no password)
+2. Run the one-liner:
    ```bash
-   wget -qO- https://raw.githubusercontent.com/anthonybiasi/opsec-vm/main/setup-tide.sh | sh
+   wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
    ```
-3. Configure network adapters (Shared + Host-Only)
-4. Reboot
+3. Press Enter to confirm disk wipe
+4. After install completes, eject ISO and reboot
+
+**Note:** Alpine 3.21+ standard ISO is required (the virt ISO doesn't boot in Parallels).
 
 ---
 
