@@ -1,88 +1,53 @@
-# Tide
+# Tide 🌊
 
-**Privacy gateway for Apple Silicon**
+**Privacy gateway for ARM64**
 
-Your invisible connection to the internet. Free, open-source, untraceable.
+Routes all traffic through Tor. Works on any ARM64 hypervisor.
 
----
-
-## What is Tide?
-
-Tide is a transparent Tor proxy gateway that routes all your internet traffic through the Tor network, protecting your identity and location. Built for Apple Silicon Macs (M1/M2/M3/M4).
-
-**From Bodegga. Built in Petaluma, CA.** 🌊
-
----
-
-## Features
-
-- ✅ **Tor transparent proxy** - All traffic automatically routed through Tor
-- ✅ **DNS leak prevention** - No DNS queries leak to your ISP
-- ✅ **.onion support** - Access hidden services built-in
-- ✅ **Fail-closed firewall** - Secure by default, no accidental leaks
-- ✅ **Apple Silicon optimized** - Native ARM64 for M1/M2/M3/M4
-- ✅ **Multi-hypervisor** - Works with Parallels, UTM, VMware, VirtualBox
+Built by [Bodegga](https://bodegga.net). Made in Petaluma, CA.
 
 ---
 
 ## Quick Start
 
-### Requirements
-- Apple Silicon Mac (M1/M2/M3/M4)
-- Parallels Desktop or UTM (free alternative)
-- 1GB RAM (for gateway VM)
-- 3GB disk space
+**Download:**
+```bash
+curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
+```
 
-### Installation (2 minutes)
+**Extract & Import:**
+```bash
+tar -xzf tide-gateway-v1.0-arm64.tar.gz -C ~/Parallels/
+prlctl register ~/Parallels/Tor-Gateway.pvm
+prlctl start Tor-Gateway
+```
 
-1. **Download** the latest release:
-   ```bash
-   curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
-   ```
+**Gateway IP:** `10.152.152.10`
 
-2. **Extract** to Parallels directory:
-   ```bash
-   tar -xzf tide-gateway-v1.0-arm64.tar.gz -C ~/Parallels/
-   ```
+---
 
-3. **Register** with Parallels:
-   ```bash
-   prlctl register ~/Parallels/Tor-Gateway.pvm
-   ```
+## What You Get
 
-4. **Start** the gateway:
-   ```bash
-   prlctl start Tor-Gateway
-   ```
-
-5. **Configure** your workstation VM to use `10.152.152.10` as gateway
-
-Done! Your traffic now flows through Tor.
+- ✅ Tor transparent proxy (all traffic protected)
+- ✅ DNS leak prevention
+- ✅ .onion support built-in
+- ✅ Fail-closed firewall
+- ✅ ~1GB download, ~500MB RAM usage
 
 ---
 
 ## Workstation Setup
 
-Configure your secure workstation VM to route through Tide:
+Point your VM to the gateway:
 
 ```bash
-# Edit network config
-sudo nano /etc/network/interfaces
-```
-
-Add:
-```
+# /etc/network/interfaces
 auto eth0
 iface eth0 inet static
     address 10.152.152.11
     netmask 255.255.255.0
     gateway 10.152.152.10
     dns-nameservers 10.152.152.10
-```
-
-Restart networking:
-```bash
-sudo systemctl restart networking
 ```
 
 Test:
@@ -93,162 +58,34 @@ curl https://check.torproject.org/api/ip
 
 ---
 
-## Architecture
+## Supported Platforms
 
-```
-Internet
-   ↑
-   | (Tor encrypted)
-   |
-[Tide Gateway VM]
-   | 10.152.152.10
-   |
-[Your Workstation VM]
-   | 10.152.152.11
-   |
-Your applications
-```
+- Parallels Desktop
+- UTM (free, open source)
+- VMware Fusion
+- VirtualBox
+- QEMU/KVM
 
-- All workstation traffic → Gateway → Tor network → Internet
-- DNS requests → Tor (no leaks)
-- Transparent proxy (no app configuration needed)
-- Fail-closed firewall (secure by default)
+All ARM64 hypervisors supported.
 
 ---
 
-## Verification
+## Build Your Own
 
-**Check your IP is hidden:**
-```bash
-curl https://api.ipify.org
-# Should show Tor exit node IP, NOT your real IP
-```
+Want Alpine instead of Debian? Smaller footprint?
 
-**Verify Tor is working:**
-```bash
-curl https://check.torproject.org/api/ip
-# Should return: {"IsTor":true}
-```
-
-**Test DNS:**
-```bash
-nslookup google.com
-# Server should be 10.152.152.10 (the gateway)
-```
-
----
-
-## Security Notes
-
-### What Tide Protects
-✅ Hides your real IP address  
-✅ Prevents ISP monitoring  
-✅ Encrypts all traffic through Tor  
-✅ Prevents DNS leaks  
-✅ Blocks accidental clearnet connections  
-
-### What Tide Doesn't Protect
-⚠️ Browser fingerprinting (use Tor Browser for max anonymity)  
-⚠️ Malware on your workstation  
-⚠️ Physical access to your Mac  
-⚠️ State-level adversaries with advanced capabilities  
-
-### Best Practices
-- Use Tor Browser on workstation for sensitive browsing
-- Keep both VMs updated
-- Create VM snapshots before updates
-- Review firewall logs periodically
-
----
-
-## Troubleshooting
-
-**Gateway won't start:**
-```bash
-prlctl start Tor-Gateway
-prlctl status Tor-Gateway
-```
-
-**Workstation not routing:**
-- Verify gateway is set to `10.152.152.10`
-- Ping gateway: `ping 10.152.152.10`
-- Check DNS: `cat /etc/resolv.conf`
-
-**Check Tor status on gateway:**
-```bash
-# (Requires Parallels Tools installed)
-prlctl exec Tor-Gateway sudo systemctl status tor
-```
-
----
-
-## Configuration
-
-**Gateway:**
-- IP: `10.152.152.10`
-- SOCKS Port: `9050` (localhost only)
-- DNS Port: `53`
-- TransPort: `9040`
-
-**Workstation:**
-- IP: `10.152.152.11`
-- Gateway: `10.152.152.10`
-- DNS: `10.152.152.10`
-
----
-
-## Building From Source
-
-Want to build your own gateway? See [BUILD.md](BUILD.md) for instructions.
-
----
-
-## About
-
-**Tide** is built by [Bodegga](https://tide.bodegga.net), a Petaluma, California-based software company.
-
-Like the Petaluma River's tide that ebbs and flows—revealing and concealing the riverbed—Tide protects your digital footprint, leaving no trace behind.
-
-**Privacy flows naturally.** 🌊
-
----
-
-## License
-
-MIT License - See [LICENSE](LICENSE) for details
+See [docs/BUILD.md](docs/BUILD.md)
 
 ---
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/bodegga/tide/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/bodegga/tide/discussions)
-- **Security:** Report vulnerabilities via GitHub Security Advisories
+- [Issues](https://github.com/bodegga/tide/issues)
+- [Discussions](https://github.com/bodegga/tide/discussions)
 
 ---
 
-**Built in Petaluma, CA**  
-**A Bodegga product**
+**Website:** [tide.bodegga.net](https://tide.bodegga.net)  
+**License:** MIT
 
-Privacy for everyone. Free forever.
-
-## Quick Install
-
-**One-liner:**
-```bash
-curl -sSL https://tide.bodegga.net/install.sh | bash
-```
-
-Or manual:
-```bash
-curl -LO https://github.com/bodegga/tide/releases/download/v1.0.0/tide-gateway-v1.0-arm64.tar.gz
-tar -xzf tide-gateway-v1.0-arm64.tar.gz -C ~/Parallels/
-prlctl register ~/Parallels/Tor-Gateway.pvm
-prlctl start Tor-Gateway
-```
-
----
-
-**Website:** https://tide.bodegga.net  
-**GitHub:** https://github.com/bodegga/tide  
-**Download:** https://github.com/bodegga/tide/releases/latest
+Privacy flows naturally. 🌊
