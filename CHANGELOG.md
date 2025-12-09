@@ -8,11 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### In Development
-- Client GUI application (system tray, connection management)
-- Takeover mode (ARP hijacking for subnet control)
-- Forced mode (fail-closed firewall enforcement)
+- v1.3: Forced mode (fail-closed firewall enforcement)
+- v1.4: Security profiles (Standard, Hardened, Paranoid, Bridges)
+- Client GUI improvements
 
-## [1.0.0] - 2025-12-09
+## [1.2.0] - 2025-12-08
+
+### Added
+- Docker Router Mode (default)
+- Gateway IP standardization (10.101.101.10)
+- Platform support clarification (Docker, VM, bare-metal)
+- Professional repository structure (CONTRIBUTING, SECURITY, CHANGELOG)
+- Badges in README
+
+### Changed
+- Updated all documentation for 10.101.101.10 gateway IP
+- Removed "Apple Silicon only" references
+- Improved .gitignore
+
+## [1.1.0] - 2025-12-08
+
+### Added
+- Cloud-init configuration
+- Pre-built VM images (qcow2, ISO)
+- Consolidated build system
+- Better QEMU test runner
+
+### Fixed
+- Cloud-init file names and password configuration
+
+## [1.0.0] - 2025-12-08
 
 ### Added
 - ✅ **Proxy Mode** - SOCKS5 (port 9050) + DNS (port 5353)
@@ -53,5 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minor (x.1.x)**: New features, backward compatible
 - **Patch (x.x.1)**: Bug fixes, security patches
 
-[unreleased]: https://github.com/bodegga/tide/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/bodegga/tide/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/bodegga/tide/releases/tag/v1.2.0
+[1.1.0]: https://github.com/bodegga/tide/releases/tag/v1.1.0
 [1.0.0]: https://github.com/bodegga/tide/releases/tag/v1.0.0

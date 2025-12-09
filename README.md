@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-Docker%20%7C%20VM%20%7C%20Bare--metal-lightgrey)](https://github.com/bodegga/tide)
-[![Version](https://img.shields.io/badge/version-1.0-green)](https://github.com/bodegga/tide/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-green)](https://github.com/bodegga/tide/releases)
 [![Tor](https://img.shields.io/badge/Tor-enabled-purple)](https://www.torproject.org/)
 
 ```

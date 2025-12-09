@@ -96,8 +96,8 @@ Settings:
 
 **Last tested:** Dec 9, 2025  
 **Test results:** DHCP + transparent routing fully working in Docker  
-**Current version:** 1.0  
-**Next release:** 1.1 (Client GUI)
+**Current version:** 1.2.0  
+**Next release:** 1.3 (Forced Mode - fail-closed)
 
 See **[ROADMAP.md](ROADMAP.md)** for full development plan.
 
