@@ -4,25 +4,25 @@
 
 Tide has 2 deployment modes (4 planned):
 
-### ✅ Proxy Mode (Working)
-**Best for:** Single machine, manual control
+### ✅ Router Mode (Default) ⭐ **RECOMMENDED**
+**Best for:** Multiple devices, automatic setup
 
 ```bash
 docker-compose up -d
 ```
 
+Connect devices to `tidenet` network - they get DHCP automatically and ALL traffic routes through Tor.
+
+### ✅ Proxy Mode (Alternative)
+**Best for:** Single machine, manual control
+
+```bash
+docker-compose -f docker-compose.proxy.yml up -d
+```
+
 Then configure apps:
 - SOCKS5: `localhost:9050`
 - DNS: `localhost:9053`
-
-### ✅ Router Mode (Working) ⭐ **RECOMMENDED**
-**Best for:** Multiple devices, automatic setup
-
-```bash
-docker-compose -f docker-compose.router.yml up -d
-```
-
-Connect devices to `tidenet` network - they get DHCP automatically and ALL traffic routes through Tor.
 
 ### 🚧 Forced Mode (Coming Soon)
 Router + fail-closed firewall (no leaks possible)
