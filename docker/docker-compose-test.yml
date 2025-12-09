@@ -4,7 +4,7 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: Dockerfile.gateway
+      dockerfile: docker/Dockerfile.gateway
     container_name: tide-gateway
     hostname: gateway
     restart: unless-stopped
