@@ -1,0 +1,57 @@
+# Changelog
+
+All notable changes to Tide will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### In Development
+- Client GUI application (system tray, connection management)
+- Takeover mode (ARP hijacking for subnet control)
+- Forced mode (fail-closed firewall enforcement)
+
+## [1.0.0] - 2025-12-09
+
+### Added
+- ✅ **Proxy Mode** - SOCKS5 (port 9050) + DNS (port 5353)
+- ✅ **Router Mode** - DHCP + transparent Tor routing (default)
+- ✅ Docker deployment with `docker-compose`
+- ✅ VM installer script (`tide-install.sh`)
+- ✅ Platform support: Docker, VMs, bare-metal
+- ✅ Security profiles: Standard, Hardened, Paranoid, Bridges
+- ✅ Client discovery scripts (Python, Shell, Swift)
+- ✅ Comprehensive documentation
+- ✅ MIT License
+
+### Security
+- Fail-closed firewall (traffic blocked if Tor fails)
+- IPv6 completely disabled (prevents leaks)
+- Immutable config files (`chattr +i`)
+- Transparent proxy via iptables
+- DNS routed through Tor DNSPort
+
+### Documentation
+- README with Quick Start guide
+- Platform compatibility matrix
+- Security model documentation
+- Deployment modes comparison
+- ROADMAP for future features
+
+## Project History
+
+- **Dec 9, 2025**: v1.0 stable release
+- **Dec 7, 2025**: Initial repository structure
+- **Dec 2025**: Active development and testing
+
+---
+
+## Version Numbering
+
+- **Major (1.x.x)**: Breaking changes, major features
+- **Minor (x.1.x)**: New features, backward compatible
+- **Patch (x.x.1)**: Bug fixes, security patches
+
+[unreleased]: https://github.com/bodegga/tide/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/bodegga/tide/releases/tag/v1.0.0
