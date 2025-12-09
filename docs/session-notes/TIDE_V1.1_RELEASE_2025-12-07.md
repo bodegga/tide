@@ -1,7 +1,7 @@
 # Tide Gateway v1.1.0 Release Session
 
 **Date:** December 7, 2025  
-**Project:** Tide Gateway (opsec-vm)  
+**Project:** Tide Gateway  
 **Release:** [v1.1.0](https://github.com/bodegga/tide/releases/tag/v1.1.0)
 
 ---

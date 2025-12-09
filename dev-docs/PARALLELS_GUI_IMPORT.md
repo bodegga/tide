@@ -12,7 +12,7 @@
 3. Select "Install Windows or another OS from a DVD or image file"
 4. Click "Continue"
 5. Click "select a file..." 
-6. Navigate to: /Users/abiasi/Documents/Personal-Projects/opsec-vm
+6. Navigate to: /Users/abiasi/Documents/Personal-Projects/tide
 7. Select: **alpine-stream.vmdk**
 8. Click "Continue"
 9. If prompted about OS: Select "Other Linux"
@@ -28,7 +28,7 @@
 3. Add CD/DVD:
    - Click "+" → CD/DVD
    - Source: Image file
-   - Browse: /Users/abiasi/Documents/Personal-Projects/opsec-vm/cloud-init.iso
+   - Browse: /Users/abiasi/Documents/Personal-Projects/tide/cloud-init.iso
 4. Add Network Adapter:
    - Click "+" → Network
    - Source: Host-Only Network

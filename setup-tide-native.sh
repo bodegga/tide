@@ -7,8 +7,8 @@ set -e
 # This ensures the resulting VM is 100% native and valid.
 
 VM_NAME="Tide-Gateway"
-ISO_PATH="$(pwd)/opsec-vm/alpine-virt-3.19.6-aarch64.iso"
-SEED_ISO="$(pwd)/opsec-vm/release/tide-seed.iso"
+ISO_PATH="$(pwd)/tide/alpine-virt-3.19.6-aarch64.iso"
+SEED_ISO="$(pwd)/tide/release/tide-seed.iso"
 
 # Check dependencies
 if ! command -v prlctl &> /dev/null; then
@@ -22,7 +22,7 @@ prlctl stop "$VM_NAME" --kill 2>/dev/null || true
 prlctl delete "$VM_NAME" 2>/dev/null || true
 
 # Create
-prlctl create "$VM_NAME" --distribution "alpine" --dst "$(pwd)/opsec-vm/tide-vm"
+prlctl create "$VM_NAME" --distribution "alpine" --dst "$(pwd)/tide/tide-vm"
 
 # Configure
 prlctl set "$VM_NAME" --memsize 512 --cpus 1

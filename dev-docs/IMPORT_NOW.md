@@ -1,14 +1,14 @@
 # IMPORT TIDE GATEWAY INTO PARALLELS - 60 SECONDS
 
 ## The VMDK is ready at:
-/Users/abiasi/Documents/Personal-Projects/opsec-vm/tide-flat.vmdk
+/Users/abiasi/Documents/Personal-Projects/tide/tide-flat.vmdk
 
 ## Do this NOW in Parallels (it's opening):
 
 1. **File → New** (or Cmd+N)
 2. Click **"Install Windows or another OS from a DVD or image file"**
 3. Click **"select a file..."**
-4. Navigate to: `/Users/abiasi/Documents/Personal-Projects/opsec-vm`
+4. Navigate to: `/Users/abiasi/Documents/Personal-Projects/tide`
 5. Select: **tide-flat.vmdk**
 6. Click **Continue**
 7. Select OS: **Other Linux**

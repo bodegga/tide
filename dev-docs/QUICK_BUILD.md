@@ -8,7 +8,7 @@
 2. Click "+" → "Virtualize"
 3. Select "Linux"
 4. Click "Browse" and select: 
-   /Users/abiasi/Documents/Personal-Projects/opsec-vm/nocloud_alpine-3.19.6-aarch64-uefi-tiny-r0.qcow2
+   /Users/abiasi/Documents/Personal-Projects/tide/nocloud_alpine-3.19.6-aarch64-uefi-tiny-r0.qcow2
 5. Name: "Tide-Gateway"
 ```
 
@@ -25,7 +25,7 @@
 1. Before starting, go to VM settings
 2. Add new drive → CD/DVD
 3. Browse and select:
-   /Users/abiasi/Documents/Personal-Projects/opsec-vm/cloud-init.iso
+   /Users/abiasi/Documents/Personal-Projects/tide/cloud-init.iso
 4. Save
 ```
 

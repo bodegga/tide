@@ -13,7 +13,7 @@
 2. File → New
 3. Choose "Install Windows or another OS from a DVD or image file"
 4. Click "Select a file..."
-5. Navigate to: /Users/abiasi/Documents/Personal-Projects/opsec-vm
+5. Navigate to: /Users/abiasi/Documents/Personal-Projects/tide
 6. Select: cloud-init.iso
 7. Click "Continue"
 8. Uncheck "Express Installation"
@@ -32,7 +32,7 @@
 5. Click the "-" button to remove it
 6. Click "+" → Add Device → Hard Disk
 7. Source: "Image file..."
-8. Browse to: /Users/abiasi/Documents/Personal-Projects/opsec-vm/alpine.raw
+8. Browse to: /Users/abiasi/Documents/Personal-Projects/tide/alpine.raw
 9. Location: External
 10. Apply
 11. **IMPORTANT**: Drag the new "Hard Disk" above "CD/DVD"  in boot order
