@@ -92,6 +92,19 @@ write_files:
       fi
       logger "Tide: Leak-proof firewall active"
 
+  - path: /etc/dnsmasq.conf
+    permissions: '0644'
+    content: |
+      # Tide Gateway DHCP + DNS
+      interface=eth1
+      dhcp-range=10.101.101.100,10.101.101.200,12h
+      dhcp-option=3,10.101.101.10
+      dhcp-option=6,10.101.101.10
+      server=127.0.0.1#5353
+      no-resolv
+      log-queries
+      log-dhcp
+
   - path: /etc/motd
     content: |
       
@@ -109,6 +122,7 @@ packages:
   - iptables
   - ip6tables
   - openssh
+  - dnsmasq
 
 runcmd:
   # Set password
@@ -122,6 +136,7 @@ runcmd:
   - rc-update add tor default
   - rc-update add iptables default
   - rc-update add local default
+  - rc-update add dnsmasq default
   
   # Apply security now
   - sysctl -p /etc/sysctl.d/tide.conf
@@ -131,6 +146,7 @@ runcmd:
   # Start services
   - rc-service sshd start
   - rc-service tor start
+  - rc-service dnsmasq start
   
   # LOCK DOWN - Make configs immutable
   - chattr +i /etc/iptables/rules-save

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Tide Gateway
+  gateway:
+    build: .
+    container_name: tide-gateway
+    hostname: gateway
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    networks:
+      tidenet:
+        ipv4_address: 10.101.101.10
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test Client - routes everything through gateway's SOCKS proxy
+  client:
+    image: alpine:3.21
+    container_name: tide-client
+    hostname: client
+    command: sh -c "apk add --no-cache curl && sleep infinity"
+    networks:
+      tidenet:
+        ipv4_address: 10.101.101.20
+    depends_on:
+      - gateway
+    environment:
+      - ALL_PROXY=socks5h://10.101.101.10:9050
+
+networks:
+  tidenet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.101.101.0/24
+          gateway: 10.101.101.1
