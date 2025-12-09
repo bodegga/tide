@@ -1,5 +1,7 @@
 # 🌊 TIDE - Transparent Internet Defense Engine
 
+*Freedom within the shell.*
+
 **Route through Tor or nothing.** A hardened, leak-proof Tor gateway with multiple deployment modes.
 
 ## Features
@@ -209,4 +211,4 @@ MIT
 
 ---
 
-**[bodegga/tide](https://github.com/bodegga/tide)** | Route through Tor or nothing. 🌊
+**[bodegga/tide](https://github.com/bodegga/tide)** | *Freedom within the shell.* 🌊
