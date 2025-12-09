@@ -96,6 +96,22 @@ rc-update add iptables default
 rc-service tor start
 ifup eth1 2>/dev/null || true
 
+echo ">>> Verifying Tor connectivity..."
+# Wait up to 60 seconds for Tor to bootstrap
+for i in $(seq 1 30); do
+    if curl --socks5-hostname 127.0.0.1:9050 --max-time 10 https://check.torproject.org/api/ip >/dev/null 2>&1; then
+        echo ">>> Tor connectivity verified!"
+        break
+    fi
+    echo ">>> Waiting for Tor bootstrap... ($i/30)"
+    sleep 2
+done
+
+if ! curl --socks5-hostname 127.0.0.1:9050 --max-time 10 https://check.torproject.org/api/ip >/dev/null 2>&1; then
+    echo "!!! WARNING: Tor connectivity check failed. Gateway may not be routing properly."
+    echo "!!! Check Tor status with: rc-service tor status"
+fi
+
 echo ">>> Setting MOTD..."
 cat > /etc/motd <<'EOF'
 
