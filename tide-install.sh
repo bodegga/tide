@@ -180,7 +180,7 @@ echo "        Alpine installed"
 # ═══════════════════════════════════════════════════════════════
 echo "  [4/7] Installing packages..."
 
-PKGS="tor iptables ip6tables"
+PKGS="tor iptables ip6tables curl"
 
 case "$TIDE_MODE" in
     router|forced|takeover) PKGS="$PKGS dnsmasq" ;;
@@ -382,6 +382,7 @@ case "$TIDE_MODE" in
 -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 9050 -j ACCEPT
 -A INPUT -i eth1 -p udp --dport 5353 -j ACCEPT
+-A INPUT -i eth1 -p tcp --dport 9051 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 22 -j ACCEPT
 -A INPUT -i eth0 -p udp --sport 67 --dport 68 -j ACCEPT
 COMMIT
@@ -405,6 +406,7 @@ COMMIT
 -A INPUT -i eth1 -p udp --dport 53 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 9040 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 9050 -j ACCEPT
+-A INPUT -i eth1 -p tcp --dport 9051 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 22 -j ACCEPT
 -A INPUT -i eth1 -p icmp -j ACCEPT
 -A INPUT -i eth0 -p udp --sport 67 --dport 68 -j ACCEPT
@@ -429,6 +431,7 @@ COMMIT
 -A INPUT -i eth1 -p udp --dport 53 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 9040 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 9050 -j ACCEPT
+-A INPUT -i eth1 -p tcp --dport 9051 -j ACCEPT
 -A INPUT -i eth1 -p tcp --dport 22 -j ACCEPT
 -A INPUT -i eth1 -p icmp -j ACCEPT
 -A INPUT -i eth0 -p udp --sport 67 --dport 68 -j ACCEPT
@@ -477,6 +480,77 @@ echo "        Network configured"
 # PHASE 7: Finalize
 # ═══════════════════════════════════════════════════════════════
 echo "  [7/7] Finalizing..."
+
+# Tide API service for client discovery
+cat > /mnt/usr/local/bin/tide-api << 'TIDEAPI'
+#!/bin/sh
+# Tide API & Discovery Service - Port 9051
+PORT=9051
+FIFO="/tmp/tide-api.fifo"
+
+cleanup() { rm -f "$FIFO"; exit 0; }
+trap cleanup INT TERM
+
+rm -f "$FIFO"
+mkfifo "$FIFO"
+
+tor_status() {
+    if ! pgrep -x tor >/dev/null 2>&1; then echo "offline"; return; fi
+    if nc -z 127.0.0.1 9050 2>/dev/null; then echo "connected"; else echo "bootstrapping"; fi
+}
+
+respond() {
+    CODE="$1"; BODY="$2"; LEN=$(printf '%s' "$BODY" | wc -c)
+    printf 'HTTP/1.1 %s\r
+Content-Type: application/json\r
+Content-Length: %d\r
+Access-Control-Allow-Origin: *\r
+Connection: close\r
+\r
+%s' "$CODE" "$LEN" "$BODY"
+}
+
+handle() {
+    read -r REQ
+    PATH=$(echo "$REQ" | cut -d' ' -f2)
+    case "$PATH" in
+        /status)
+            MODE=$(cat /etc/tide/mode 2>/dev/null || echo "unknown")
+            SEC=$(cat /etc/tide/security 2>/dev/null || echo "standard")
+            TOR=$(tor_status)
+            UP=$(cut -d. -f1 /proc/uptime)
+            respond "200 OK" "{\"gateway\":\"tide\",\"version\":\"1.0\",\"mode\":\"$MODE\",\"security\":\"$SEC\",\"tor\":\"$TOR\",\"uptime\":$UP,\"ip\":\"10.101.101.1\",\"ports\":{\"socks\":9050,\"dns\":5353,\"api\":$PORT}}"
+            ;;
+        /circuit)
+            IP=$(curl -s --socks5 127.0.0.1:9050 --max-time 5 https://check.torproject.org/api/ip 2>/dev/null || echo '{"error":"timeout"}')
+            respond "200 OK" "$IP"
+            ;;
+        /newcircuit) killall -HUP tor 2>/dev/null; respond "200 OK" '{"success":true}' ;;
+        /check)
+            CHECK=$(curl -s --socks5 127.0.0.1:9050 --max-time 10 https://check.torproject.org/api/ip 2>/dev/null)
+            if echo "$CHECK" | grep -q "IsTor.*true"; then respond "200 OK" "$CHECK"; else respond "503 Service Unavailable" '{"IsTor":false}'; fi
+            ;;
+        /discover|/) respond "200 OK" '{"service":"tide","version":"1.0"}' ;;
+        *) respond "404 Not Found" '{"error":"not found"}' ;;
+    esac
+}
+
+logger -t tide-api "Starting on port $PORT"
+while true; do cat "$FIFO" | nc -l -p $PORT > >(while read -r line; do echo "$line"; done | handle) > "$FIFO" 2>/dev/null; done
+TIDEAPI
+chmod +x /mnt/usr/local/bin/tide-api
+
+# Tide API init script
+cat > /mnt/etc/init.d/tide-api << 'INITAPI'
+#!/sbin/openrc-run
+name="Tide API"
+description="Tide Gateway Discovery API"
+command="/usr/local/bin/tide-api"
+command_background="yes"
+pidfile="/run/tide-api.pid"
+depend() { after tor; }
+INITAPI
+chmod +x /mnt/etc/init.d/tide-api
 
 # tide CLI utility
 cat > /mnt/usr/local/bin/tide << 'TIDECMD'
@@ -564,6 +638,7 @@ chroot /mnt rc-update add tor default >/dev/null
 chroot /mnt rc-update add iptables default >/dev/null
 chroot /mnt rc-update add local default >/dev/null
 chroot /mnt rc-update add sshd default >/dev/null
+chroot /mnt rc-update add tide-api default >/dev/null
 [ "$TIDE_MODE" != "proxy" ] && chroot /mnt rc-update add dnsmasq default >/dev/null
 
 sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /mnt/etc/ssh/sshd_config

@@ -18,6 +18,15 @@
 | **Forced** | Router + fail-closed firewall | High security |
 | **Takeover** | Forced + ARP hijacking | Full subnet control |
 
+## Security Profiles
+
+| Profile | Description | Trade-off |
+|---------|-------------|-----------|
+| **Standard** | Default Tor settings | Fastest, most relays |
+| **Hardened** | Excludes 14-eyes countries | Fewer exits, more privacy |
+| **Paranoid** | Max isolation, hostile countries blocked | Slowest, maximum anonymity |
+| **Bridges** | Uses obfs4 bridges | Anti-censorship, bypasses blocks |
+
 ## Quick Start
 
 ### Docker (Proxy Only)
@@ -75,11 +84,70 @@ Download from [Releases](https://github.com/bodegga/tide/releases):
 ## Commands
 
 ```bash
-tide status    # Show mode, Tor status, IP
-tide check     # Test Tor connectivity
-tide takeover  # Activate ARP hijacking (takeover mode)
-tide release   # Stop ARP hijacking
+tide status      # Show mode, Tor status, IP
+tide check       # Test Tor connectivity
+tide newcircuit  # Request new Tor circuit
+tide onion       # Show SSH .onion address (if enabled)
+tide takeover    # Activate ARP hijacking (takeover mode)
+tide release     # Stop ARP hijacking
 ```
+
+## Client Apps
+
+Tide includes client apps for easy gateway discovery and connection.
+
+### Discovery API (Port 9051)
+
+The gateway runs an HTTP API for auto-discovery:
+
+```bash
+# Check gateway status
+curl http://10.101.101.1:9051/status
+
+# Response:
+# {"gateway":"tide","version":"1.0","mode":"forced","security":"hardened",
+#  "tor":"connected","uptime":3600,"ip":"10.101.101.1",
+#  "ports":{"socks":9050,"dns":5353,"api":9051}}
+
+# Get current exit IP
+curl http://10.101.101.1:9051/circuit
+
+# Request new circuit
+curl http://10.101.101.1:9051/newcircuit
+
+# Verify Tor is working
+curl http://10.101.101.1:9051/check
+```
+
+### Python Client (Cross-Platform)
+
+```bash
+# Install dependencies
+pip install requests pystray pillow
+
+# Run
+python client/tide-client.py
+```
+
+Features:
+- System tray icon with Tor status
+- Auto-discovers gateway on local network
+- One-click circuit refresh
+- Shows current exit IP
+
+### macOS Native Client
+
+Build with Xcode or Swift:
+```bash
+swiftc client/macos/TideClient.swift -o TideClient
+./TideClient
+```
+
+Features:
+- Native menu bar app
+- Auto-discovery via Bonjour
+- Click to copy proxy settings
+- Status indicator (🟢 connected / 🔴 offline)
 
 ## Architecture
 
