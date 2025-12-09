@@ -88,13 +88,18 @@ Settings:
 | Feature | Status |
 |---------|--------|
 | Proxy Mode (SOCKS5) | ✅ Working |
-| Router Mode (DHCP + Transparent) | ✅ Working |
-| Forced Mode (Fail-closed) | 🚧 In Development |
-| Takeover Mode (ARP hijack) | 🚧 In Development |
-| VM Images (qcow2/OVA) | 🚧 In Development |
+| Router Mode (DHCP + Transparent) | ✅ Working (Default) |
+| Client GUI Application | 🚧 v1.1 - In Development |
+| Takeover Mode (ARP hijack) | 🚧 v1.2 - In Development |
+| Forced Mode (Fail-closed) | 📋 v1.3 - Planned |
+| VM Images (qcow2/OVA) | 📋 v1.5 - Planned |
 
 **Last tested:** Dec 9, 2025  
-**Test results:** DHCP + transparent routing fully working in Docker
+**Test results:** DHCP + transparent routing fully working in Docker  
+**Current version:** 1.0  
+**Next release:** 1.1 (Client GUI)
+
+See **[ROADMAP.md](ROADMAP.md)** for full development plan.
 
 ---
 
