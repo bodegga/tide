@@ -2,41 +2,41 @@
 
 **Dead-simple Tor gateway for your VMs.** Route all VM traffic through Tor with zero client configuration.
 
-## Quick Start
+## Quick Start (Pick Your Hypervisor)
 
-### Option A: Parallels Desktop (Recommended for Mac)
+### Parallels Desktop
 
 ```bash
-# Clone and run the builder
-git clone https://github.com/bodegga/tide.git
-cd tide
-./build-parallels.sh
-```
+# 1. Download Alpine ISO (one-time)
+curl -LO https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-standard-3.21.2-aarch64.iso
 
-Then in the Parallels console:
-```bash
-# Login as root (no password), then run:
+# 2. Create VM: File → New → Install from DVD/image → select the ISO
+#    - 512MB RAM, 2GB disk
+#    - Add second network adapter: Host-Only
+
+# 3. Boot, login as root (no password), run ONE command:
 wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
+
+# 4. Type 'yes', wait 2-3 min, eject ISO, reboot. Done!
 ```
 
-Type `yes` to confirm, wait 2-3 minutes, eject ISO, reboot.
-
-### Option B: UTM / QEMU (Mac)
+### UTM (Mac)
 
 Download from [Releases](https://github.com/bodegga/tide/releases):
 - `tide-gateway.qcow2` + `cloud-init.iso`
 
-1. Create VM → Import qcow2 as boot disk
-2. Attach cloud-init.iso as CD
-3. Add 2 network adapters (Shared + Host-Only)
-4. Boot and wait 2 minutes
+1. Create VM → Virtualize → Linux
+2. Import `tide-gateway.qcow2` as boot disk  
+3. Attach `cloud-init.iso` as CD
+4. Add 2 NICs: Shared Network + Host-Only
+5. Boot and wait 2 minutes - auto-configures!
 
-### Option C: Any Hypervisor (Manual)
+### VMware / VirtualBox / Any Other
 
-1. Download [Alpine Standard ISO](https://alpinelinux.org/downloads/) (3.20+)
-2. Create VM with 512MB RAM, 2GB disk, 2 NICs (NAT + Host-Only)
-3. Boot ISO, login as `root`
-4. Run: `wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh`
+```bash
+# Boot any Alpine Linux 3.20+ ISO, login as root, run:
+wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
+```
 
 ---
 
