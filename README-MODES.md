@@ -85,10 +85,17 @@ docker-compose -f docker-compose-test.yml up -d
 
 ## Current Status
 
-✅ **Proxy mode** - Working (Docker + VM)  
-✅ **Router mode** - Working (Docker, VM needs testing)  
-🚧 **Forced mode** - In development  
-🚧 **Takeover mode** - In development  
+✅ **Proxy mode** - Working (Docker)  
+✅ **Router mode** - Working (Docker) - **DEFAULT**  
+🚧 **Forced mode** - Planned for v1.3  
+🚧 **Takeover mode** - In development for v1.2  
+
+## Upcoming
+
+**v1.1:** Client GUI application for easy connection management  
+**v1.2:** Takeover mode development and testing  
+
+See [ROADMAP.md](ROADMAP.md) for full development plan.  
 
 ---
 

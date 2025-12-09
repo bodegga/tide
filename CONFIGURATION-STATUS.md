@@ -117,8 +117,23 @@ docker-compose -f docker-compose.router.yml up -d
 
 All files are properly configured and tested for both working modes.
 
-**Next steps:**
-1. Implement Forced Mode (stricter firewall)
-2. Implement Takeover Mode (ARP hijacking)
-3. Build VM images (qcow2, OVA)
-4. Add security profiles (standard, hardened, paranoid, bridges)
+**Next Steps:**
+
+**Priority 1 - v1.1:** Client GUI Application
+- Complete `/client/tide-client.py` 
+- System tray icon for all platforms
+- One-click connect/disconnect
+- Visual Tor status indicator
+
+**Priority 2 - v1.2:** Takeover Mode
+- ARP hijacking implementation
+- Network device discovery
+- Safety mechanisms and rollback
+- Extensive testing in isolated environments
+
+**Future:**
+- v1.3: Forced Mode (fail-closed firewall)
+- v1.4: Security profiles
+- v1.5: VM images (qcow2, OVA)
+
+See [ROADMAP.md](ROADMAP.md) for complete development plan.
