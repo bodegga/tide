@@ -1,0 +1,27 @@
+# Tide Gateway - Transparent Routing Mode
+# This container acts as a gateway, transparently routing all traffic through Tor
+
+FROM alpine:3.21
+
+# Install packages
+RUN apk add --no-cache \
+    tor \
+    iptables \
+    dnsmasq \
+    ca-certificates \
+    && rm -rf /var/cache/apk/*
+
+# Tor config for transparent proxy
+RUN mkdir -p /var/lib/tor /var/log/tor && \
+    chown -R tor:tor /var/lib/tor /var/log/tor
+
+COPY torrc-gateway /etc/tor/torrc
+
+# Startup script
+COPY gateway-start.sh /usr/local/bin/gateway-start.sh
+RUN chmod +x /usr/local/bin/gateway-start.sh
+
+USER root
+EXPOSE 9040 5353 9050
+
+CMD ["/usr/local/bin/gateway-start.sh"]

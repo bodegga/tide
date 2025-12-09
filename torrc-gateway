@@ -1,0 +1,24 @@
+# Tide Gateway - Tor Configuration for Transparent Proxy
+
+User tor
+DataDirectory /var/lib/tor
+
+# Transparent proxy port (iptables redirects TCP here)
+TransPort 0.0.0.0:9040
+
+# DNS port (iptables redirects DNS here)
+DNSPort 0.0.0.0:5353
+
+# SOCKS5 (for testing/manual use)
+SocksPort 0.0.0.0:9050
+
+# Virtual network for Tor DNS
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+
+# Logging
+Log notice stdout
+
+# Security
+SafeLogging 1
+AvoidDiskWrites 1
