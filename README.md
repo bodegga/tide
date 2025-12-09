@@ -1,130 +1,94 @@
 # 🌊 Tide Gateway
 
-**Dead-simple Tor gateway for your VMs.** Route all VM traffic through Tor with zero client configuration.
+**Dead-simple Tor gateway.** Two deployment options:
 
-## Quick Start (Pick Your Hypervisor)
-
-### Parallels Desktop
+## Option 1: Docker Container (Easiest)
 
 ```bash
-# 1. Download Alpine ISO (one-time)
-curl -LO https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-standard-3.21.2-aarch64.iso
+# Run Tide as a container
+docker run -d --name tide -p 9050:9050 -p 5353:5353 bodegga/tide
 
-# 2. Create VM: File → New → Install from DVD/image → select the ISO
-#    - 512MB RAM, 2GB disk
-#    - Add second network adapter: Host-Only
-
-# 3. Boot, login as root (no password), run ONE command:
-wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
-
-# 4. Type 'yes', wait 2-3 min, eject ISO, reboot. Done!
+# Or with docker-compose
+git clone https://github.com/bodegga/tide.git && cd tide
+docker-compose up -d
 ```
 
-### UTM (Mac)
+Configure your apps:
+- **SOCKS5 Proxy:** `localhost:9050`
+- **DNS:** `localhost:5353`
+
+Test it:
+```bash
+curl --socks5-hostname localhost:9050 https://check.torproject.org/api/ip
+```
+
+## Option 2: VM Gateway (Full Transparency)
+
+Routes ALL traffic from client VMs through Tor automatically.
+
+### UTM / QEMU (Mac/Linux)
 
 Download from [Releases](https://github.com/bodegga/tide/releases):
-- `tide-gateway.qcow2` + `cloud-init.iso`
+- `tide-gateway.qcow2`
+- `cloud-init.iso`
 
-1. Create VM → Virtualize → Linux
-2. Import `tide-gateway.qcow2` as boot disk  
-3. Attach `cloud-init.iso` as CD
-4. Add 2 NICs: Shared Network + Host-Only
-5. Boot and wait 2 minutes - auto-configures!
+1. Create VM → Import qcow2 as boot disk
+2. Attach cloud-init.iso as CD
+3. Add 2 NICs: Shared + Host-Only  
+4. Boot (auto-configures in ~2 min)
 
-### VMware / VirtualBox / Any Other
+### VMware / VirtualBox / Hyper-V
 
 ```bash
-# Boot any Alpine Linux 3.20+ ISO, login as root, run:
+# Boot Alpine ISO, login as root, run:
 wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
 ```
 
----
-
-## After Installation
+### After VM Setup
 
 **Login:** `root` / `tide`  
 **Gateway IP:** `10.101.101.10`
 
-### Connect Client VMs
-
-1. Put client VM on same Host-Only network as Tide's eth1
-2. Configure client networking:
-
+Configure client VMs:
 | Setting | Value |
 |---------|-------|
-| IP | `10.101.101.20` (or any .11-.99) |
-| Subnet | `255.255.255.0` |
+| IP | `10.101.101.x` (11-99) |
 | Gateway | `10.101.101.10` |
 | DNS | `10.101.101.10` |
-| IPv6 | **Disabled** |
 
-3. Test: Open browser → https://check.torproject.org
-
----
-
-## Gateway Services
-
-| Port | Service | Description |
-|------|---------|-------------|
-| 9040 | TransPort | Transparent TCP proxy (automatic) |
-| 5353 | DNSPort | DNS over Tor |
-| 9050 | SOCKS5 | Manual proxy (optional) |
-| 22 | SSH | Administration |
-
-### Useful Commands
-
-```bash
-rc-service tor status          # Check Tor
-rc-service tor restart         # New circuit
-tail -f /var/log/messages      # View logs
-iptables -L -n -v -t nat       # Check firewall
-```
+Test: Visit https://check.torproject.org in client browser.
 
 ---
 
 ## How It Works
 
-```
-┌─────────────┐     ┌─────────────────┐     ┌─────────┐
-│  Client VM  │────▶│  Tide Gateway   │────▶│   Tor   │────▶ Internet
-│ (Kali, etc) │     │  10.101.101.10  │     │ Network │
-└─────────────┘     └─────────────────┘     └─────────┘
-    eth0               eth1      eth0
- Host-Only           LAN       WAN (NAT)
-```
+**Docker mode:** Apps connect to Tor via SOCKS5 proxy.
 
-All TCP traffic from clients is transparently routed through Tor. DNS queries go through Tor's DNS resolver. No client configuration needed beyond pointing gateway/DNS to Tide.
+**VM mode:** All traffic is transparently redirected through Tor:
+```
+Client VM → Tide Gateway (iptables) → Tor Network → Internet
+```
 
 ---
 
-## Building from Source
+## Building
 
 ```bash
-# For UTM/QEMU releases (qcow2 + cloud-init)
+# Build Docker image
+docker build -t tide .
+
+# Build VM images (requires QEMU)
 ./build-release.sh
-
-# For Parallels (creates VM, you run installer)
-./build-parallels.sh
-
-# Test with QEMU
-./run-tide-qemu.sh fresh
 ```
 
 ---
 
 ## Security Notes
 
-- ⚠️ Default password is `tide` - change it!
-- Root SSH enabled for convenience - disable in production
+- Default password is `tide` - change it in production
 - IPv6 disabled to prevent leaks
-- All LAN traffic forced through Tor
+- All DNS queries go through Tor
 
 ---
 
-## License
-
-MIT - See [LICENSE](LICENSE)
-
----
-
-**Built with Alpine Linux + Tor | [bodegga/tide](https://github.com/bodegga/tide)**
+**[bodegga/tide](https://github.com/bodegga/tide)** | Alpine Linux + Tor

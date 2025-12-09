@@ -1,0 +1,22 @@
+# Tide Gateway - Docker Compose
+# ==============================
+# Start: docker-compose up -d
+# Stop:  docker-compose down
+#
+# Exposes:
+#   - SOCKS5 proxy on localhost:9050
+#   - DNS on localhost:5353
+
+services:
+  tide:
+    build: .
+    container_name: tide-gateway
+    restart: unless-stopped
+    ports:
+      - "9050:9050"   # SOCKS5 proxy
+      - "5353:5353"   # DNS over Tor
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
