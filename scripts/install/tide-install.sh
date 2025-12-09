@@ -459,7 +459,7 @@ if [ "$TIDE_MODE" = "takeover" ]; then
 cat > /mnt/etc/tide/takeover.sh << 'TAKEOVER'
 #!/bin/sh
 IFACE="eth1"
-MY_IP="10.101.101.1"
+MY_IP="10.101.101.10"
 logger "TIDE: Starting takeover"
 echo 1 > /proc/sys/net/ipv4/conf/$IFACE/proxy_arp
 (
@@ -527,7 +527,7 @@ handle() {
             SEC=$(cat /etc/tide/security 2>/dev/null || echo "standard")
             TOR=$(tor_status)
             UP=$(cut -d. -f1 /proc/uptime)
-            respond "200 OK" "{\"gateway\":\"tide\",\"version\":\"1.0\",\"mode\":\"$MODE\",\"security\":\"$SEC\",\"tor\":\"$TOR\",\"uptime\":$UP,\"ip\":\"10.101.101.1\",\"ports\":{\"socks\":9050,\"dns\":5353,\"api\":$PORT}}"
+            respond "200 OK" "{\"gateway\":\"tide\",\"version\":\"1.0\",\"mode\":\"$MODE\",\"security\":\"$SEC\",\"tor\":\"$TOR\",\"uptime\":$UP,\"ip\":\"10.101.101.10\",\"ports\":{\"socks\":9050,\"dns\":5353,\"api\":$PORT}}"
             ;;
         /circuit)
             IP=$(curl -s --socks5 127.0.0.1:9050 --max-time 5 https://check.torproject.org/api/ip 2>/dev/null || echo '{"error":"timeout"}')
@@ -668,7 +668,7 @@ cat > /mnt/etc/motd << MOTD
   ╠═══════════════════════════════════════════════════════════╣
   ║  Mode:     $(printf "%-47s" "$TIDE_MODE")║
   ║  Security: $(printf "%-47s" "$SECURITY")║
-  ║  Gateway:  10.101.101.1                                   ║
+  ║  Gateway:  10.101.101.10                                   ║
   ╠═══════════════════════════════════════════════════════════╣
   ║  tide status  │  tide check  │  tide newcircuit           ║
   ╚═══════════════════════════════════════════════════════════╝
@@ -703,7 +703,7 @@ echo "  ║              ✅  INSTALLATION COMPLETE                    ║"
 echo "  ╠═══════════════════════════════════════════════════════════╣"
 echo "  ║  Mode:     $TIDE_MODE"
 echo "  ║  Security: $SECURITY"
-echo "  ║  Gateway:  10.101.101.1                                   ║"
+echo "  ║  Gateway:  10.101.101.10                                   ║"
 echo "  ║  Login:    root / tide                                    ║"
 echo "  ╠═══════════════════════════════════════════════════════════╣"
 
