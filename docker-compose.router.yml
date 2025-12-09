@@ -1,0 +1,39 @@
+# Tide Gateway - Router Mode (DHCP + Transparent Routing)
+# ========================================================
+# Start: docker-compose -f docker-compose.router.yml up -d
+# Stop:  docker-compose -f docker-compose.router.yml down
+#
+# What this does:
+#   - Gateway runs Tor with transparent proxy
+#   - Gateway runs DHCP server (assigns IPs automatically)
+#   - Clients connect and get everything configured automatically
+#   - All traffic routes through Tor (no SOCKS5 config needed)
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: tide-gateway-router
+    hostname: tide-gateway
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      tidenet:
+        ipv4_address: ${TIDE_GATEWAY_IP:-10.101.101.10}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  tidenet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${TIDE_SUBNET:-10.101.101.0/24}
+          gateway: 10.101.101.1
