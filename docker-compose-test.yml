@@ -23,17 +23,28 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      tidenet:
-        ipv4_address: 10.101.101.20
+      tidenet: {}  # No static IP - will use DHCP
     depends_on:
       - gateway
     entrypoint: >
       sh -c "
       apk add --no-cache curl &&
-      route del default &&
-      route add default gw 10.101.101.10 &&
-      echo 'nameserver 10.101.101.10' > /etc/resolv.conf &&
-      echo '✅ Client routing through 10.101.101.10' &&
+      echo '✅ Requesting IP via DHCP from gateway...' &&
+      udhcpc -i eth0 -f -n &&
+      echo '' &&
+      echo '=== Network Configuration ===' &&
+      ip addr show eth0 | grep inet &&
+      echo '' &&
+      echo '=== Routing Table ===' &&
+      ip route &&
+      echo '' &&
+      echo '=== DNS Configuration ===' &&
+      cat /etc/resolv.conf &&
+      echo '' &&
+      echo '=== Testing Tor ===' &&
+      sleep 5 &&
+      curl -s https://check.torproject.org/api/ip &&
+      echo '' &&
       sleep infinity
       "
 
