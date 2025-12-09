@@ -17,12 +17,22 @@
 
 **Route through Tor or nothing.** A hardened, leak-proof Tor gateway with multiple deployment modes.
 
+## Platform Support
+
+Tide runs on **any platform** that supports Docker or VMs:
+- ✅ **Docker** - Linux, macOS (Intel/Apple Silicon), Windows (WSL2)
+- ✅ **VMs** - UTM, QEMU, VirtualBox, VMware, Parallels, Hyper-V
+- ✅ **Bare-metal** - Any Alpine Linux compatible hardware (x86_64, ARM64)
+
+Client devices can be **anything** with network access.
+
 ## Features
 
 - **Fail-Closed Security** - If Tor dies, traffic is blocked (not leaked)
 - **Immutable Config** - Critical files locked with `chattr +i`
 - **Multiple Modes** - From simple proxy to full subnet takeover
 - **Zero Config Clients** - DHCP + DNS handles everything
+- **Platform Agnostic** - Runs anywhere Docker or VMs do
 
 ## Deployment Modes
 
