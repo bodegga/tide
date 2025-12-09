@@ -27,7 +27,7 @@ class TideGateway: ObservableObject {
     
     func startDiscovery() {
         // Try common gateway IPs first
-        let commonIPs = ["10.101.101.1", "192.168.1.1", "10.0.0.1"]
+        let commonIPs = ["10.101.101.10", "192.168.1.1", "10.0.0.1"]
         
         for ip in commonIPs {
             checkGateway(ip: ip)

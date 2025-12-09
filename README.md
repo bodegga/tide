@@ -69,10 +69,10 @@ Download from [Releases](https://github.com/bodegga/tide/releases):
 **For Router/Forced/Takeover modes:** Clients just connect - DHCP handles everything.
 
 **For Proxy mode:** Configure apps manually:
-- SOCKS5: `10.101.101.1:9050`
-- DNS: `10.101.101.1:5353`
+- SOCKS5: `10.101.101.10:9050`
+- DNS: `10.101.101.10:5353`
 
-**Verify:** `curl --socks5 10.101.101.1:9050 https://check.torproject.org/api/ip`
+**Verify:** `curl --socks5 10.101.101.10:9050 https://check.torproject.org/api/ip`
 
 ## Security Model
 
@@ -117,21 +117,21 @@ The gateway runs an HTTP API for auto-discovery:
 
 ```bash
 # Check gateway status
-curl http://10.101.101.1:9051/status
+curl http://10.101.101.10:9051/status
 
 # Response:
 # {"gateway":"tide","version":"1.0","mode":"forced","security":"hardened",
-#  "tor":"connected","uptime":3600,"ip":"10.101.101.1",
+#  "tor":"connected","uptime":3600,"ip":"10.101.101.10",
 #  "ports":{"socks":9050,"dns":5353,"api":9051}}
 
 # Get current exit IP
-curl http://10.101.101.1:9051/circuit
+curl http://10.101.101.10:9051/circuit
 
 # Request new circuit
-curl http://10.101.101.1:9051/newcircuit
+curl http://10.101.101.10:9051/newcircuit
 
 # Verify Tor is working
-curl http://10.101.101.1:9051/check
+curl http://10.101.101.10:9051/check
 ```
 
 ### Python Client (Cross-Platform)
@@ -179,7 +179,7 @@ Features:
 │  │   │ DHCP+DNS   │◀────│ Auto-DHCP  │     │Auto-DHCP │  │  │
 │  │   │ Tor Proxy  │     │            │     │          │  │  │
 │  │   │            │     └────────────┘     └──────────┘  │  │
-│  │   │ 10.101.101.1│         ▲                   ▲        │  │
+│  │   │10.101.101.10│         ▲                   ▲        │  │
 │  │   └──────┬─────┘         │                   │        │  │
 │  │          │               └───────────────────┘        │  │
 │  └──────────┼───────────────────────────────────────────┘  │

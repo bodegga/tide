@@ -43,7 +43,7 @@ discover_gateway() {
     log_info "Searching for Tide Gateway..."
 
     # Common IPs to check
-    CANDIDATES=("10.101.101.1" "192.168.1.1" "192.168.0.1" "10.0.0.1")
+    CANDIDATES=("10.101.101.10" "192.168.1.1" "192.168.0.1" "10.0.0.1")
 
     # Add default gateway if available
     if command -v ip >/dev/null 2>&1; then

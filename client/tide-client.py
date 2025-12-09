@@ -46,7 +46,7 @@ class TideClient:
         
         # Common gateway IPs to check
         candidates = [
-            "10.101.101.1",      # Default Tide IP
+            "10.101.101.10",     # Default Tide IP
             "192.168.1.1",
             "192.168.0.1",
             "10.0.0.1",
