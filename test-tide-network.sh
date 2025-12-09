@@ -37,25 +37,16 @@ qemu-system-aarch64 \
   -bios "$BIOS" \
   -netdev user,id=wan0 \
   -device virtio-net-device,netdev=wan0,mac=52:54:00:12:34:01 \
-  -netdev socket,id=lan0,listen=unix:"$SOCKET" \
+  -netdev socket,id=lan0,listen=:8010 \
   -device virtio-net-device,netdev=lan0,mac=52:54:00:12:34:02 \
   &
 
 GATEWAY_PID=$!
 echo "Gateway PID: $GATEWAY_PID"
 
-# Wait for socket to be created
-echo "Waiting for LAN socket..."
-for i in {1..10}; do
-    [ -S "$SOCKET" ] && break
-    sleep 1
-done
-
-if [ ! -S "$SOCKET" ]; then
-    echo "ERROR: Gateway failed to create LAN socket"
-    kill $GATEWAY_PID 2>/dev/null
-    exit 1
-fi
+# Wait for gateway to boot
+echo "Waiting for gateway to boot (15 seconds)..."
+sleep 15
 
 echo ""
 echo "Starting Client (will get IP via gateway)..."
@@ -71,7 +62,7 @@ qemu-system-aarch64 \
   -device virtio-blk-device,drive=hd0 \
   -bios "$BIOS" \
   -cdrom "$CLOUD_INIT" \
-  -netdev socket,id=lan0,connect=unix:"$SOCKET" \
+  -netdev socket,id=lan0,connect=127.0.0.1:8010 \
   -device virtio-net-device,netdev=lan0,mac=52:54:00:12:34:03
 
 # Cleanup

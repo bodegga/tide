@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
     ports:
       - "9050:9050"   # SOCKS5 proxy
-      - "5353:5353"   # DNS over Tor
+      - "9053:5353/udp"   # DNS over Tor (mapped to 9053 to avoid macOS conflict)
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
       interval: 30s
