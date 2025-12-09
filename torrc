@@ -1,5 +1,16 @@
-User tor
+# Tide Gateway - Tor Configuration (Docker)
+
 DataDirectory /var/lib/tor
+
+# SOCKS5 proxy
 SocksPort 0.0.0.0:9050
+
+# DNS resolver
 DNSPort 0.0.0.0:5353
+
+# Logging
 Log notice stdout
+
+# Security
+SafeLogging 1
+AvoidDiskWrites 1

@@ -1,19 +1,17 @@
 #cloud-config
-
-# Tide Gateway - Alpine Tor Gateway Cloud-Init Config
-# This configures a fresh Alpine cloud image as a Tor transparent proxy
+# Tide Gateway - Secure Cloud-Init Config
+# IMMUTABLE + FAIL-CLOSED design
 
 hostname: tide-gateway
 
-# Configure root user for simplicity
 users:
   - name: root
     lock_passwd: false
     shell: /bin/ash
 
-# Network configuration
 write_files:
   - path: /etc/network/interfaces
+    permissions: '0644'
     content: |
       auto lo
       iface lo inet loopback
@@ -25,17 +23,17 @@ write_files:
       iface eth1 inet static
           address 10.101.101.10
           netmask 255.255.255.0
+
+  - path: /etc/sysctl.d/tide.conf
     permissions: '0644'
-  
-  - path: /etc/sysctl.d/tor-gateway.conf
     content: |
-      net.ipv4.ip_forward = 1
-      net.ipv6.conf.all.disable_ipv6 = 1
-    permissions: '0644'
-  
+      net.ipv4.ip_forward=1
+      net.ipv6.conf.all.disable_ipv6=1
+      net.ipv6.conf.default.disable_ipv6=1
+
   - path: /etc/tor/torrc
+    permissions: '0644'
     content: |
-      # Tide Gateway - Tor Configuration
       User tor
       DataDirectory /var/lib/tor
       SocksPort 0.0.0.0:9050
@@ -43,11 +41,11 @@ write_files:
       TransPort 0.0.0.0:9040
       VirtualAddrNetworkIPv4 10.192.0.0/10
       AutomapHostsOnResolve 1
-      AutomapHostsSuffixes .onion
       Log notice syslog
-    permissions: '0644'
-  
+      SafeLogging 1
+
   - path: /etc/iptables/rules-save
+    permissions: '0644'
     content: |
       *nat
       :PREROUTING ACCEPT [0:0]
@@ -56,62 +54,95 @@ write_files:
       :POSTROUTING ACCEPT [0:0]
       -A PREROUTING -i eth1 -p udp --dport 53 -j REDIRECT --to-ports 5353
       -A PREROUTING -i eth1 -p tcp --dport 53 -j REDIRECT --to-ports 5353
-      -A PREROUTING -i eth1 -p tcp --syn -j REDIRECT --to-ports 9040
+      -A PREROUTING -i eth1 -p tcp -j REDIRECT --to-ports 9040
       COMMIT
-      
       *filter
       :INPUT DROP [0:0]
       :FORWARD DROP [0:0]
-      :OUTPUT ACCEPT [0:0]
+      :OUTPUT DROP [0:0]
       -A INPUT -i lo -j ACCEPT
       -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+      -A INPUT -i eth1 -p icmp -j ACCEPT
       -A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 9050 -j ACCEPT
       -A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 9040 -j ACCEPT
       -A INPUT -i eth1 -s 10.101.101.0/24 -p udp --dport 5353 -j ACCEPT
       -A INPUT -i eth1 -s 10.101.101.0/24 -p tcp --dport 22 -j ACCEPT
-      -A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT
+      -A INPUT -i eth0 -p udp --sport 67 --dport 68 -j ACCEPT
+      -A OUTPUT -o lo -j ACCEPT
+      -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+      -A OUTPUT -o eth0 -m owner --uid-owner tor -j ACCEPT
+      -A OUTPUT -o eth0 -p udp --dport 67 -j ACCEPT
+      -A OUTPUT -o eth0 -p udp --dport 123 -j ACCEPT
+      -A OUTPUT -o eth1 -j ACCEPT
       COMMIT
-    permissions: '0644'
 
-# Install packages
+  - path: /etc/local.d/tide-security.start
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      # Tide Security - Runs every boot
+      sysctl -p /etc/sysctl.d/tide.conf
+      iptables-restore < /etc/iptables/rules-save
+      # Verify fail-closed is active
+      if ! iptables -L OUTPUT -n | grep -q "DROP"; then
+          iptables -P INPUT DROP
+          iptables -P OUTPUT DROP
+          iptables -P FORWARD DROP
+          logger "TIDE: Emergency lockdown activated"
+      fi
+      logger "Tide: Leak-proof firewall active"
+
+  - path: /etc/motd
+    content: |
+      
+        🌊 TIDE GATEWAY - SECURE
+        ════════════════════════════════════════
+        Gateway: 10.101.101.10 | Login: root/tide
+        
+        🔒 FAIL-CLOSED: No clearnet leaks possible
+        🔒 IMMUTABLE: Config files locked
+        ════════════════════════════════════════
+      
+
 packages:
   - tor
   - iptables
   - ip6tables
   - openssh
 
-# Run commands after packages are installed
 runcmd:
-  # Set root password to "tide"
-  - echo "root:tide" | chpasswd
+  # Set password
+  - echo 'root:tide' | chpasswd
   
-  # Enable root SSH login (for testing only)
+  # SSH config
   - sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  
+  # Enable services
   - rc-update add sshd default
-  - rc-service sshd start
-  
-  # Apply sysctl settings
-  - sysctl -p /etc/sysctl.d/tor-gateway.conf
-  
-  # Bring up eth1 (LAN interface)
-  - ifup eth1 || true
-  
-  # Apply iptables rules
-  - iptables-restore < /etc/iptables/rules-save
-  
-  # Enable services to start on boot
   - rc-update add tor default
   - rc-update add iptables default
+  - rc-update add local default
   
-  # Start Tor
+  # Apply security now
+  - sysctl -p /etc/sysctl.d/tide.conf
+  - iptables-restore < /etc/iptables/rules-save
+  - /etc/init.d/iptables save
+  
+  # Start services
+  - rc-service sshd start
   - rc-service tor start
   
-  # Save iptables rules
-  - /etc/init.d/iptables save || true
+  # LOCK DOWN - Make configs immutable
+  - chattr +i /etc/iptables/rules-save
+  - chattr +i /etc/tor/torrc
+  - chattr +i /etc/sysctl.d/tide.conf
+  - chattr +i /etc/local.d/tide-security.start
+  - chattr +i /etc/network/interfaces
   
-  # Mark setup complete
-  - echo "Tide Gateway configured successfully on $(date)" > /root/SETUP_COMPLETE
-  - echo "Login: root / tide" >> /root/SETUP_COMPLETE
-  - echo "Gateway IP: 10.101.101.10" >> /root/SETUP_COMPLETE
+  # Disable cloud-init from running again
+  - touch /etc/cloud/cloud-init.disabled
+  
+  # Log completion
+  - logger "Tide Gateway: Secure configuration complete"
 
-final_message: "Tide Gateway is ready! Login: root/tide | Gateway: 10.101.101.10"
+final_message: "Tide Gateway SECURE - Immutable configs locked"
