@@ -114,6 +114,10 @@ echo ""
 # PHASE 1: Network Bootstrap
 # ═══════════════════════════════════════════════════════════════
 echo "  [1/7] Bootstrapping network..."
+# FIX DNS FIRST
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
 
 setup-interfaces -a -r 2>/dev/null || {
     cat > /etc/network/interfaces << 'EOF'
