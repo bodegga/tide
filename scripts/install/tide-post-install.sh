@@ -1,6 +1,5 @@
 #!/bin/sh
 # Tide Post-Install - Run AFTER Alpine is already installed
-# Usage: ./tide-post-install.sh
 
 set -e
 
@@ -10,13 +9,6 @@ echo ""
 
 # Check we're in Alpine
 [ -f /etc/alpine-release ] || { echo "❌ Run from Alpine Linux"; exit 1; }
-
-# Check if Alpine is installed to disk
-if [ ! -f /etc/apk/world ]; then
-    echo "❌ Alpine not installed to disk yet"
-    echo "   Run 'setup-alpine' first!"
-    exit 1
-fi
 
 # Mode selection
 echo "Select deployment mode:"
@@ -57,15 +49,25 @@ echo ""
 echo "► Mode: $TIDE_MODE | Security: $SECURITY"
 echo ""
 
-# Install packages
+# Ensure repos are set
+echo "[0/5] Configuring repositories..."
+cat > /etc/apk/repositories << REPOS
+http://dl-cdn.alpinelinux.org/alpine/v3.21/main
+http://dl-cdn.alpinelinux.org/alpine/v3.21/community
+REPOS
+
+# Install packages (only what's available)
 echo "[1/5] Installing packages..."
 apk update
-apk add tor iptables dnsmasq python3
 
-# Killa-whale needs extra tools
-if [ "$TIDE_MODE" = "killa-whale" ] || [ "$TIDE_MODE" = "takeover" ]; then
-    apk add nmap iputils net-tools
-fi
+# Core packages
+apk add tor iptables python3 || { echo "❌ Failed to install core packages"; exit 1; }
+
+# Optional packages (don't fail if missing)
+apk add dnsmasq 2>/dev/null || echo "⚠️  dnsmasq not available, using tor DNS only"
+apk add nmap 2>/dev/null || echo "⚠️  nmap not available, ARP scanning disabled"
+apk add iputils 2>/dev/null || true
+apk add net-tools 2>/dev/null || true
 
 # Install Tide files
 echo "[2/5] Installing Tide Gateway..."
@@ -88,6 +90,16 @@ echo "[3/5] Configuring mode..."
 echo "$TIDE_MODE" > /etc/tide/mode
 echo "$SECURITY" > /etc/tide/security
 
+# Create environment file
+cat > /etc/tide/env << ENVFILE
+TIDE_MODE=$TIDE_MODE
+TIDE_SECURITY=$SECURITY
+TIDE_GATEWAY_IP=10.101.101.10
+TIDE_SUBNET=10.101.101.0/24
+TIDE_DHCP_START=10.101.101.100
+TIDE_DHCP_END=10.101.101.200
+ENVFILE
+
 # Create OpenRC service
 echo "[4/5] Creating service..."
 cat > /etc/init.d/tide-gateway << 'SERVICE'
@@ -107,8 +119,10 @@ depend() {
 
 start_pre() {
     mkdir -p /var/log/tide
-    export TIDE_MODE=$(cat /etc/tide/mode)
-    export TIDE_SECURITY=$(cat /etc/tide/security)
+    # Load environment
+    [ -f /etc/tide/env ] && . /etc/tide/env
+    export TIDE_MODE TIDE_SECURITY TIDE_GATEWAY_IP TIDE_SUBNET
+    export TIDE_DHCP_START TIDE_DHCP_END
 }
 SERVICE
 
@@ -127,10 +141,9 @@ echo ""
 echo "Check logs:"
 echo "  tail -f /var/log/tide/gateway.log"
 echo ""
-echo "Auto-start on boot: ENABLED"
-echo ""
 if [ "$TIDE_MODE" = "killa-whale" ]; then
-    echo "🐋 KILLA WHALE MODE - Maximum aggression!"
-    echo "   ARP poisoning will begin immediately"
+    echo "🐋 KILLA WHALE MODE READY"
+    echo "   Maximum aggression, zero escapes"
+    echo "   ARP poisoning starts on service start"
+    echo ""
 fi
-echo ""
