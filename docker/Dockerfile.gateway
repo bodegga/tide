@@ -9,19 +9,24 @@ RUN apk add --no-cache \
     iptables \
     dnsmasq \
     ca-certificates \
+    curl \
+    python3 \
     && rm -rf /var/cache/apk/*
 
 # Tor config for transparent proxy
-RUN mkdir -p /var/lib/tor /var/log/tor && \
-    chown -R tor:tor /var/lib/tor /var/log/tor
+RUN mkdir -p /var/lib/tor /var/log/tor /etc/tide && \
+    chown -R tor:tor /var/lib/tor /var/log/tor && \
+    echo "router" > /etc/tide/mode && \
+    echo "standard" > /etc/tide/security
 
 COPY torrc-gateway /etc/tor/torrc
 
-# Startup script
-COPY gateway-start.sh /usr/local/bin/gateway-start.sh
-RUN chmod +x /usr/local/bin/gateway-start.sh
+# Copy startup scripts
+COPY scripts/runtime/gateway-start.sh /usr/local/bin/gateway-start.sh
+COPY scripts/runtime/tide-api.py /usr/local/bin/tide-api.py
+RUN chmod +x /usr/local/bin/gateway-start.sh /usr/local/bin/tide-api.py
 
 USER root
-EXPOSE 9040 5353 9050
+EXPOSE 9040 5353 9050 9051
 
 CMD ["/usr/local/bin/gateway-start.sh"]

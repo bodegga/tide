@@ -10,7 +10,9 @@ echo 1 > /proc/sys/net/ipv4/ip_forward 2>/dev/null || echo "⚠️  IP forwardin
 sleep 2
 
 # Setup iptables for transparent proxy
-# Redirect all TCP traffic from clients to Tor TransPort
+# Exclude API port from Tor redirection
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 9051 -j ACCEPT
+# Redirect all other TCP traffic from clients to Tor TransPort
 iptables -t nat -A PREROUTING -i eth0 -p tcp -j REDIRECT --to-ports 9040
 
 # Redirect DNS queries to Tor DNSPort  
@@ -39,6 +41,10 @@ DNSMASQ
 # Start dnsmasq (DHCP + DNS)
 echo "🌐 Starting dnsmasq (DHCP + DNS)..."
 dnsmasq --no-daemon --log-facility=- &
+
+# Start API server (port 9051)
+echo "🌐 Starting Tide API server (port 9051)..."
+python3 /usr/local/bin/tide-api.py &
 
 # Start Tor
 echo "🔐 Starting Tor..."

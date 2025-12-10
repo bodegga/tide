@@ -14,8 +14,8 @@
 services:
   gateway:
     build:
-      context: .
-      dockerfile: Dockerfile.gateway
+      context: ..
+      dockerfile: docker/Dockerfile.gateway
     container_name: tide-gateway-router
     hostname: tide-gateway
     restart: unless-stopped

@@ -1,0 +1,13 @@
+# Tide Client Dependencies
+# =========================
+# Python 3.8+
+
+# Core (no external deps - stdlib only for shared module)
+
+# GUI Clients (PyQt6 for Linux/Windows)
+PyQt6==6.6.1
+PyQt6-Qt6==6.6.1
+PyQt6-sip==13.6.0
+
+# Build tools
+pyinstaller==6.3.0
