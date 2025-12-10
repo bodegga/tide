@@ -28,7 +28,7 @@ curl -sSL https://raw.githubusercontent.com/bodegga/tide/main/ONE-COMMAND-DEPLOY
 ### 1. Download Template
 
 ```bash
-curl -L -o tide-template.tar.gz https://github.com/bodegga/tide/releases/download/v1.2.0/Tide-Gateway-Template-v1.2.0.tar.gz
+curl -L -o tide-template.tar.gz https://github.com/bodegga/tide/releases/download/v1.1.1/Tide-Gateway-Template-v1.1.1.tar.gz
 ```
 
 ### 2. Extract to Parallels
@@ -127,7 +127,7 @@ prlctl clone Tide-Gateway-Auto --name Tide-Gateway-TEMPLATE
 ./PACKAGE-RELEASE.sh
 ```
 
-Outputs: `releases/Tide-Gateway-Template-v1.2.0.tar.gz`
+Outputs: `releases/Tide-Gateway-Template-v1.1.1.tar.gz`
 
 ---
 
