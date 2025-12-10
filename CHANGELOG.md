@@ -1,84 +1,102 @@
 # Changelog
 
-All notable changes to Tide will be documented in this file.
+All notable changes to Tide Gateway will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### In Development
-- v1.3: Forced mode (fail-closed firewall enforcement)
-- v1.4: Security profiles (Standard, Hardened, Paranoid, Bridges)
-- Client GUI improvements
-
-## [1.2.0] - 2025-12-08
+## [v1.1.1] - 2025-12-09
 
 ### Added
-- Docker Router Mode (default)
-- Gateway IP standardization (10.101.101.10)
-- Platform support clarification (Docker, VM, bare-metal)
-- Professional repository structure (CONTRIBUTING, SECURITY, CHANGELOG)
-- Badges in README
+- **Working Parallels VM template** (192MB compressed, 379MB extracted)
+- **ONE-COMMAND deployment** - `curl -sSL ... | bash`
+- **Automated VM creation** using prlctl
+- **Killa Whale mode fully operational**
+  - ARP poisoning working
+  - Tor transparent proxy
+  - DHCP server (10.101.101.100-200)
+  - DNS over Tor
+  - Fail-closed firewall
+- Deployment scripts:
+  - `ONE-COMMAND-DEPLOY.sh` - Download and deploy in one command
+  - `DEPLOY-TEMPLATE.sh` - Clone template and start
+  - `PACKAGE-RELEASE.sh` - Package template for release
+  - `FINAL-INSTALL.sh` - Install Tide in fresh Alpine VM
+  - `CLEAN-DEPLOY.sh` - Fresh Alpine to Tide Gateway
+- Documentation:
+  - `DEPLOYMENT-README.md` - Complete deployment guide
+  - `FRESH-INSTALL-GUIDE.md` - Manual install instructions
 
 ### Changed
-- Updated all documentation for 10.101.101.10 gateway IP
-- Removed "Apple Silicon only" references
-- Improved .gitignore
+- Switched from Docker (can't access kernel) to VM-based deployment
+- Improved installer scripts to handle Alpine package availability
+- Fixed DNS configuration issues
+- Fixed Tor permissions (`/var/lib/tor` ownership)
 
-## [1.1.0] - 2025-12-08
+### Technical Details
+- Built on Alpine Linux 3.21 (ARM64)
+- Services: Tor, dnsmasq, iptables, arping, nmap
+- Network: eth0=shared (internet), eth1=host-only (attack network)
+- Gateway IP: 10.101.101.10
+- Auto-starts on boot via OpenRC
 
-### Added
-- Cloud-init configuration
-- Pre-built VM images (qcow2, ISO)
-- Consolidated build system
-- Better QEMU test runner
-
-### Fixed
-- Cloud-init file names and password configuration
-
-## [1.0.0] - 2025-12-08
-
-### Added
-- ✅ **Proxy Mode** - SOCKS5 (port 9050) + DNS (port 5353)
-- ✅ **Router Mode** - DHCP + transparent Tor routing (default)
-- ✅ Docker deployment with `docker-compose`
-- ✅ VM installer script (`tide-install.sh`)
-- ✅ Platform support: Docker, VMs, bare-metal
-- ✅ Security profiles: Standard, Hardened, Paranoid, Bridges
-- ✅ Client discovery scripts (Python, Shell, Swift)
-- ✅ Comprehensive documentation
-- ✅ MIT License
-
-### Security
-- Fail-closed firewall (traffic blocked if Tor fails)
-- IPv6 completely disabled (prevents leaks)
-- Immutable config files (`chattr +i`)
-- Transparent proxy via iptables
-- DNS routed through Tor DNSPort
-
-### Documentation
-- README with Quick Start guide
-- Platform compatibility matrix
-- Security model documentation
-- Deployment modes comparison
-- ROADMAP for future features
-
-## Project History
-
-- **Dec 9, 2025**: v1.0 stable release
-- **Dec 7, 2025**: Initial repository structure
-- **Dec 2025**: Active development and testing
+### Session Notes
+- 6 hours of development
+- Multiple deployment approaches tested (Docker, QEMU, Parallels)
+- Final solution: Parallels template with automated deployment
+- Template creation automated via prlctl CLI
 
 ---
 
-## Version Numbering
+## [v1.1.0] - 2025-12-08
 
-- **Major (1.x.x)**: Breaking changes, major features
-- **Minor (x.1.x)**: New features, backward compatible
-- **Patch (x.x.1)**: Bug fixes, security patches
+### Added
+- Universal Tor Appliance release
+- Cloud-init build system
+- Multi-architecture support
 
-[unreleased]: https://github.com/bodegga/tide/compare/v1.2.0...HEAD
-[1.2.0]: https://github.com/bodegga/tide/releases/tag/v1.2.0
-[1.1.0]: https://github.com/bodegga/tide/releases/tag/v1.1.0
-[1.0.0]: https://github.com/bodegga/tide/releases/tag/v1.0.0
+---
+
+## Development History (v1.0.0 - v1.2.0)
+
+*Note: These releases were removed during versioning cleanup, but all commits are preserved in git history.*
+
+### Dec 9, 2025 - Killa Whale Development
+- Renamed "forced" mode to "Killa Whale" (Andre Nickatina tribute)
+- Implemented ARP poisoning and aggressive network takeover
+- Discovered Docker limitation (needs kernel access for Killa Whale)
+- Created multiple installer scripts:
+  - `ALPINE-POST-SETUP.sh`
+  - `FINISH-INSTALL.sh`
+  - `QUICK-SETUP.sh`
+  - `SIMPLE-START.sh` / `SIMPLE-START-V2.sh`
+  - `DIAGNOSE.sh`
+  - `FIX-PERMISSIONS.sh`
+- Built QEMU automation scripts
+- Created Parallels deployment automation
+- Fixed DNS, Tor permissions, network configuration issues
+- **Final achievement**: Working VM template with one-command deployment
+
+### Earlier Development
+- Mode selection system (proxy, router, killa-whale, takeover)
+- Fail-closed firewall implementation
+- Tide wave icon and brand assets
+- Native client apps (macOS, Linux, Windows)
+- API token authentication
+- Standard repository files
+
+---
+
+## Git History Preserved
+
+All development work is preserved in git commits. Use:
+```bash
+git log --oneline --all
+```
+
+To see full development history.
+
+---
+
+**Versioning Philosophy**: 
+- Major (X.0.0): Breaking changes
+- Minor (1.X.0): New features
+- Patch (1.1.X): Bug fixes, improvements
+
