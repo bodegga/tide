@@ -1,0 +1,35 @@
+# Tide Gateway - Hardened Tor Configuration
+# Excludes 14-eyes surveillance countries for enhanced privacy
+
+User tor
+DataDirectory /var/lib/tor
+
+# Transparent proxy port
+TransPort 0.0.0.0:9040
+
+# DNS port
+DNSPort 0.0.0.0:5353
+
+# SOCKS5
+SocksPort 0.0.0.0:9050
+
+# Virtual network for Tor DNS
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+
+# Logging
+Log notice stdout
+
+# Security
+SafeLogging 1
+AvoidDiskWrites 1
+
+# HARDENED: Exclude 14-eyes countries
+# Five Eyes: US, UK, CA, AU, NZ
+# Nine Eyes: + DK, FR, NL, NO
+# Fourteen Eyes: + DE, BE, IT, ES, SE
+ExcludeNodes {us},{gb},{ca},{au},{nz},{dk},{fr},{nl},{no},{de},{be},{it},{es},{se}
+ExcludeExitNodes {us},{gb},{ca},{au},{nz},{dk},{fr},{nl},{no},{de},{be},{it},{es},{se}
+
+# Prefer privacy-friendly countries
+StrictNodes 1

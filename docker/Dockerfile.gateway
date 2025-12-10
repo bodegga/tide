@@ -19,7 +19,14 @@ RUN mkdir -p /var/lib/tor /var/log/tor /etc/tide && \
     echo "router" > /etc/tide/mode && \
     echo "standard" > /etc/tide/security
 
+# Copy all torrc configurations
 COPY torrc-gateway /etc/tor/torrc
+COPY config/torrc-hardened /etc/tor/torrc-hardened
+COPY config/torrc-paranoid /etc/tor/torrc-paranoid
+COPY config/torrc-bridges /etc/tor/torrc-bridges
+
+# Copy leak-proof iptables rules
+COPY config/iptables-leak-proof.rules /etc/tide/iptables-leak-proof.rules
 
 # Copy startup scripts
 COPY scripts/runtime/gateway-start.sh /usr/local/bin/gateway-start.sh

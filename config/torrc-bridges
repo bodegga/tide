@@ -1,0 +1,41 @@
+# Tide Gateway - Bridges Mode (obfs4)
+# For censorship bypass and anti-detection
+
+User tor
+DataDirectory /var/lib/tor
+
+# Transparent proxy port
+TransPort 0.0.0.0:9040
+
+# DNS port
+DNSPort 0.0.0.0:5353
+
+# SOCKS5
+SocksPort 0.0.0.0:9050
+
+# Virtual network for Tor DNS
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+
+# Logging
+Log notice stdout
+
+# Security
+SafeLogging 1
+AvoidDiskWrites 1
+
+# BRIDGES MODE: Use obfs4 bridges to bypass censorship
+UseBridges 1
+ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy
+
+# Bridge configuration
+# NOTE: You MUST add your own bridge lines here
+# Get bridges from: https://bridges.torproject.org/
+#
+# Example bridge lines (replace with real bridges):
+# Bridge obfs4 85.31.186.98:443 FC259A04A328A07FED1413E9FC6526530D9FD87A cert=RutxZlu8BtyP+y45dKONJ3hNRCU/0uc5z8c7g6HrdpBmtPCbEZR52E5/1dH0hIKW0dZ1d2FVVP iat-mode=0
+# Bridge obfs4 193.11.166.194:27015 2D82C2E354D531A68469ADF7F878FA6060C6BACA cert=4TLQPJrTSaDffMK7Nbao6LC7G9OW/NHkUwIdjLSS3KYf0Nv4/nQiiI8dY2TcsQx01NniOg iat-mode=0
+# Bridge obfs4 193.11.166.194:27020 86AC7B8D430DAC4117E9F42C9EAED18133863AAF cert=0LDeJH4JzMDtkJJrFBXK0ggvCKR1D1S8gSHNwjfGpfj5iBP1SqzRPzK1dNfHjq1mKNDu4Q iat-mode=0
+
+# IMPORTANT: Without valid bridges, Tor will fail to connect
+# Uncomment and add real bridge lines above before using this mode

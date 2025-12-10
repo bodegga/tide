@@ -1,0 +1,40 @@
+# Tide Gateway - Paranoid Tor Configuration
+# Maximum isolation, hostile countries blocked
+
+User tor
+DataDirectory /var/lib/tor
+
+# Transparent proxy port
+TransPort 0.0.0.0:9040 IsolateDestAddr IsolateDestPort
+
+# DNS port
+DNSPort 0.0.0.0:5353
+
+# SOCKS5 with maximum isolation
+SocksPort 0.0.0.0:9050 IsolateDestAddr IsolateDestPort IsolateClientAddr
+
+# Virtual network for Tor DNS
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+
+# Logging
+Log notice stdout
+
+# Security
+SafeLogging 1
+AvoidDiskWrites 1
+
+# PARANOID: Exclude all surveillance & hostile countries
+# 14-eyes + China, Russia, Iran, North Korea, and other surveillance states
+ExcludeNodes {us},{gb},{ca},{au},{nz},{dk},{fr},{nl},{no},{de},{be},{it},{es},{se},{cn},{ru},{ir},{kp},{sg},{my},{th},{vn},{id},{pk},{eg},{sa},{ae},{il},{tr}
+ExcludeExitNodes {us},{gb},{ca},{au},{nz},{dk},{fr},{nl},{no},{de},{be},{it},{es},{se},{cn},{ru},{ir},{kp},{sg},{my},{th},{vn},{id},{pk},{eg},{sa},{ae},{il},{tr}
+
+# Only use most privacy-friendly exits
+StrictNodes 1
+
+# Maximum circuit isolation
+IsolateClientProtocol 1
+IsolateSOCKSAuth 1
+
+# Longer circuits for additional hops
+NumEntryGuards 6
