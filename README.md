@@ -40,8 +40,8 @@ Client devices can be **anything** with network access.
 |------|-------------|----------|
 | **Proxy** | SOCKS5 + DNS only | Single VM, testing |
 | **Router** | DHCP + DNS + transparent proxy | VM lab, isolated network |
-| **Forced** | Router + fail-closed firewall | High security |
-| **Takeover** | Forced + ARP hijacking | Full subnet control |
+| **Killa Whale** | Router + fail-closed firewall | High security |
+| **Takeover** | Killa Whale + ARP hijacking | Full subnet control |
 
 ## Security Profiles
 
@@ -76,7 +76,7 @@ Download from [Releases](https://github.com/bodegga/tide/releases):
 
 ## Client Configuration
 
-**For Router/Forced/Takeover modes:** Clients just connect - DHCP handles everything.
+**For Router/Killa Whale/Takeover modes:** Clients just connect - DHCP handles everything.
 
 **For Proxy mode:** Configure apps manually:
 - SOCKS5: `10.101.101.10:9050`
@@ -130,7 +130,7 @@ The gateway runs an HTTP API for auto-discovery:
 curl http://10.101.101.10:9051/status
 
 # Response:
-# {"gateway":"tide","version":"1.0","mode":"forced","security":"hardened",
+# {"gateway":"tide","version":"1.0","mode":"killa-whale","security":"hardened",
 #  "tor":"connected","uptime":3600,"ip":"10.101.101.10",
 #  "ports":{"socks":9050,"dns":5353,"api":9051}}
 

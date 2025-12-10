@@ -6,7 +6,7 @@
 |------|------|-------------|-------------|----------|
 | **Proxy** | ❌ | ❌ | ❌ | Single machine, manual config |
 | **Router** | ✅ | ✅ | ❌ | Home lab, trusted network |
-| **Forced** | ✅ | ✅ | ✅ | High security, paranoid users |
+| **Killa Whale** | ✅ | ✅ | ✅ | High security, paranoid users |
 | **Takeover** | ✅ | ✅ | ✅ | Full subnet control (advanced) |
 
 ## Mode Details
@@ -39,7 +39,7 @@
 
 **Use case:** Home lab, VM testing, trusted devices
 
-### 3. Forced Mode
+### 3. Killa Whale Mode
 **What it does:**
 - Everything from Router mode PLUS
 - Fail-closed firewall (if Tor dies, traffic is BLOCKED)
@@ -53,7 +53,7 @@
 
 ### 4. Takeover Mode ⚠️
 **What it does:**
-- Everything from Forced mode PLUS
+- Everything from Killa Whale mode PLUS
 - ARP hijacking to force ALL subnet traffic through gateway
 - Intercepts traffic from devices that didn't configure gateway
 
@@ -74,7 +74,7 @@ cp .env.example .env
 
 # Edit mode
 vim .env
-TIDE_MODE=router  # Change to: proxy, router, forced, or takeover
+TIDE_MODE=router  # Change to: proxy, router, killa-whale, or takeover
 ```
 
 Then start:
@@ -87,7 +87,7 @@ docker-compose -f docker-compose-test.yml up -d
 
 ✅ **Proxy mode** - Working (Docker)  
 ✅ **Router mode** - Working (Docker) - **DEFAULT**  
-🚧 **Forced mode** - Planned for v1.3  
+🚧 **Killa Whale mode** - Planned for v1.3  
 🚧 **Takeover mode** - In development for v1.2  
 
 ## Upcoming

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Tide Gateway Startup - Multi-mode support
-# Supports: proxy, router, forced, takeover
+# Supports: proxy, router, killa-whale, takeover
 
 set -e
 
@@ -76,10 +76,10 @@ EOF
     dnsmasq --no-daemon --log-facility=- &
 
 # ============================================
-# MODE: FORCED (AGGRESSIVE TAKEOVER)
+# MODE: KILLA WHALE (AGGRESSIVE TAKEOVER)
 # ============================================
-elif [ "$TIDE_MODE" = "forced" ]; then
-    echo "🚨 Mode: FORCED - AGGRESSIVE NETWORK TAKEOVER"
+elif [ "$TIDE_MODE" = "killa-whale" ]; then
+    echo "🐋 Mode: KILLA WHALE - AGGRESSIVE NETWORK TAKEOVER"
     echo "   ⚠️  MAXIMUM AGGRESSION: All subnet traffic WILL be intercepted"
     echo "   ⚠️  ARP poisoning, IP hijacking, fail-closed enforcement"
     echo "   ⚠️  NOTHING escapes without going through Tor"
@@ -241,21 +241,21 @@ SCANSCRIPT
     echo "✅ ARP POISONING ACTIVE - All devices will be intercepted"
 
 # ============================================
-# MODE: TAKEOVER (Forced + ARP Hijack)
+# MODE: TAKEOVER (Killa Whale + ARP Hijack)
 # ============================================
 elif [ "$TIDE_MODE" = "takeover" ]; then
     echo "🔧 Mode: Takeover (ARP Hijacking)"
     echo "⚠️  WARNING: This mode is NOT YET IMPLEMENTED"
-    echo "   Falling back to Forced mode..."
+    echo "   Falling back to Killa Whale mode..."
     
     # TODO: Implement ARP hijacking
-    # For now, just use forced mode
-    TIDE_MODE=forced
-    exec "$0"  # Re-run with forced mode
+    # For now, just use killa-whale mode
+    TIDE_MODE=killa-whale
+    exec "$0"  # Re-run with killa-whale mode
 
 else
     echo "❌ Unknown mode: $TIDE_MODE"
-    echo "   Valid modes: proxy, router, forced, takeover"
+    echo "   Valid modes: proxy, router, killa-whale, takeover"
     exit 1
 fi
 

@@ -1,12 +1,14 @@
-# ⚠️ FORCED MODE - AGGRESSIVE NETWORK TAKEOVER
+# 🐋 KILLA WHALE MODE - AGGRESSIVE NETWORK TAKEOVER
 
 ## WARNING: MAXIMUM AGGRESSION
 
-**Forced Mode** is designed to be **ABSOLUTELY RUTHLESS** in intercepting network traffic. 
+**Killa Whale Mode** is designed to be **ABSOLUTELY RUTHLESS** in intercepting network traffic. 
+
+Named after the legendary Bay Area rapper Andre Nickatina, this mode is as aggressive as it gets.
 
 ### What It Does
 
-When you enable `TIDE_MODE=forced`, the gateway becomes a **network tyrant**:
+When you enable `TIDE_MODE=killa-whale`, the gateway becomes a **network tyrant**:
 
 1. **ARP Poisoning**: Continuously broadcasts fake ARP packets claiming to be the default gateway
 2. **Proxy ARP**: Responds to ARP requests for ANY IP address on the subnet
@@ -116,7 +118,7 @@ dhcp-option=6,10.101.101.10  # Force DNS to Tide
 Device → Real Gateway (192.168.1.1) → ISP → Internet
 ```
 
-### After Tide FORCED Mode
+### After Tide killa-whale mode
 ```
 Device → [ARP POISON] → Tide Gateway → Tor → Internet
               ↓
@@ -176,7 +178,7 @@ Device → [ARP POISON] → Tide Gateway → Tor → Internet
 
 ---
 
-## Stopping FORCED Mode
+## Stopping killa-whale mode
 
 ### Graceful Shutdown
 ```bash
@@ -213,7 +215,7 @@ sudo arp -d -a
 
 ---
 
-## Monitoring FORCED Mode
+## Monitoring killa-whale mode
 
 ### Check if ARP poisoning is active
 ```bash
@@ -234,7 +236,7 @@ docker exec tide-gateway-router cat /tmp/tide-seen-hosts
 
 ## Comparison: Router vs FORCED
 
-| Feature | Router Mode | FORCED Mode |
+| Feature | Router Mode | killa-whale mode |
 |---------|-------------|-------------|
 | **DHCP** | Polite | Authoritative |
 | **ARP** | Normal | POISONED |
@@ -248,7 +250,7 @@ docker exec tide-gateway-router cat /tmp/tide-seen-hosts
 
 ## Bottom Line
 
-**FORCED Mode** is designed for scenarios where you need **ABSOLUTE CERTAINTY** that ALL traffic on a subnet goes through Tor, with NO exceptions, NO escapes, and NO bypasses.
+**killa-whale mode** is designed for scenarios where you need **ABSOLUTE CERTAINTY** that ALL traffic on a subnet goes through Tor, with NO exceptions, NO escapes, and NO bypasses.
 
 It is **intentionally aggressive** and will **actively fight** to control the network.
 

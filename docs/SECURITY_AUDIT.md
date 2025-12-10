@@ -148,7 +148,7 @@ net.ipv6.conf.all.disable_ipv6 = 1  # IPv6 disabled ✅
 - **Side Channels**: Timing attacks, traffic analysis
 
 #### Mitigation Effectiveness
-- **Bypass Attempts**: ✅ Blocked by FORWARD DROP + forced proxy
+- **Bypass Attempts**: ✅ Blocked by FORWARD DROP + killa-whale proxy
 - **Network Attacks**: ✅ Isolated network, no routing
 - **Gateway Compromise**: ⚠️ SSH exposed, but minimal services
 - **Side Channels**: ⚠️ Tor provides some protection, but not complete

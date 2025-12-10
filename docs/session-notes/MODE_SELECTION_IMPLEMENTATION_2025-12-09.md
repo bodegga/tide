@@ -7,12 +7,12 @@
 
 ## Problem
 
-The Tide gateway had `.env` configuration variables for different modes (`TIDE_MODE`, `TIDE_SECURITY`) but the startup script **ignored them**. Setting `TIDE_MODE=forced` did nothing.
+The Tide gateway had `.env` configuration variables for different modes (`TIDE_MODE`, `TIDE_SECURITY`) but the startup script **ignored them**. Setting `TIDE_MODE=killa-whale` did nothing.
 
 ### What Wasn't Working
 
 1. **Mode Selection**: `gateway-start.sh` didn't check `TIDE_MODE` environment variable
-2. **Forced Mode**: Leak-proof iptables rules existed in `config/iptables-leak-proof.rules` but were never loaded
+2. **Killa Whale Mode**: Leak-proof iptables rules existed in `config/iptables-leak-proof.rules` but were never loaded
 3. **Security Profiles**: Torrc configs for hardened/paranoid/bridges modes weren't wired up
 4. **Takeover Mode**: No ARP hijacking code existed
 
@@ -31,8 +31,8 @@ The Tide gateway had `.env` configuration variables for different modes (`TIDE_M
 **Modes Now Functional:**
 - ✅ **Proxy Mode**: SOCKS5 only, no DHCP, no transparent routing
 - ✅ **Router Mode**: Transparent routing + DHCP (default)
-- ✅ **Forced Mode**: Router + fail-closed OUTPUT firewall
-- 🚧 **Takeover Mode**: Placeholder (falls back to Forced mode)
+- ✅ **Killa Whale Mode**: Router + fail-closed OUTPUT firewall
+- 🚧 **Takeover Mode**: Placeholder (falls back to Killa Whale mode)
 
 ### 2. Created Security Profile Torrc Files
 
@@ -58,9 +58,9 @@ The Tide gateway had `.env` configuration variables for different modes (`TIDE_M
 
 ## Technical Details
 
-### Forced Mode Firewall Rules
+### Killa Whale Mode Firewall Rules
 
-The key difference between Router and Forced mode is the OUTPUT chain:
+The key difference between Router and Killa Whale mode is the OUTPUT chain:
 
 **Router Mode (Fail-Open):**
 ```bash
@@ -68,7 +68,7 @@ iptables -P OUTPUT ACCEPT  # Default policy: ACCEPT
 # If Tor dies, gateway can still leak traffic
 ```
 
-**Forced Mode (Fail-Closed):**
+**Killa Whale Mode (Fail-Closed):**
 ```bash
 iptables -P OUTPUT DROP  # Default policy: DROP
 iptables -A OUTPUT -m owner --uid-owner tor -p tcp -j ACCEPT  # ONLY Tor allowed
@@ -93,7 +93,7 @@ Chain OUTPUT (policy DROP 0 packets, 0 bytes)
 
 ```bash
 # Deployment mode
-TIDE_MODE=forced  # proxy, router, forced, takeover
+TIDE_MODE=killa-whale  # proxy, router, killa-whale, takeover
 
 # Security profile  
 TIDE_SECURITY=hardened  # standard, hardened, paranoid, bridges
@@ -120,7 +120,7 @@ docker logs tide-gateway-router | head -20
 You'll see:
 ```
 📋 Configuration:
-   Mode: forced
+   Mode: killa-whale
    Security: hardened
    Gateway IP: 10.101.101.10
 🔒 Loading fail-closed firewall rules...
@@ -153,9 +153,9 @@ You'll see:
 
 ## Testing
 
-✅ **Tested Forced Mode:**
+✅ **Tested Killa Whale Mode:**
 - Built new image
-- Started container with `TIDE_MODE=forced`
+- Started container with `TIDE_MODE=killa-whale`
 - Verified OUTPUT chain has DROP policy
 - Verified only Tor UID can connect out
 - Tor bootstrap successful

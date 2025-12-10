@@ -39,8 +39,8 @@ echo "  │  DEPLOYMENT MODE                                        │"
 echo "  ├─────────────────────────────────────────────────────────┤"
 echo "  │  [1]  PROXY      - SOCKS5 + DNS only                    │"
 echo "  │  [2]  ROUTER     - DHCP + DNS + transparent proxy       │"
-echo "  │  [3]  FORCED     - Router + leak-proof firewall         │"
-echo "  │  [4]  TAKEOVER   - Forced + ARP hijack ⚠️                │"
+echo "  │  [3]  KILLA-WHALE     - Router + leak-proof firewall         │"
+echo "  │  [4]  TAKEOVER   - Killa Whale + ARP hijack ⚠️                │"
 echo "  └─────────────────────────────────────────────────────────┘"
 printf "  Select [1-4]: "
 read MODE_NUM
@@ -48,7 +48,7 @@ read MODE_NUM
 case "$MODE_NUM" in
     1) TIDE_MODE="proxy" ;;
     2) TIDE_MODE="router" ;;
-    3) TIDE_MODE="forced" ;;
+    3) TIDE_MODE="killa-whale" ;;
     4) TIDE_MODE="takeover" ;;
     *) echo "Invalid"; exit 1 ;;
 esac
@@ -191,7 +191,7 @@ echo "  [4/7] Installing packages..."
 PKGS="tor iptables ip6tables curl"
 
 case "$TIDE_MODE" in
-    router|forced|takeover) PKGS="$PKGS dnsmasq" ;;
+    router|killa-whale|takeover) PKGS="$PKGS dnsmasq" ;;
 esac
 
 case "$TIDE_MODE" in
@@ -422,7 +422,7 @@ COMMIT
 EOF
         ;;
 
-    forced|takeover)
+    killa-whale|takeover)
         cat > /mnt/etc/iptables/rules-save << 'EOF'
 *nat
 :PREROUTING ACCEPT [0:0]
@@ -624,7 +624,7 @@ sysctl -p /etc/sysctl.d/tide.conf >/dev/null 2>&1
 iptables-restore < /etc/iptables/rules-save
 
 MODE=$(cat /etc/tide/mode 2>/dev/null)
-if [ "$MODE" = "forced" ] || [ "$MODE" = "takeover" ]; then
+if [ "$MODE" = "killa-whale" ] || [ "$MODE" = "takeover" ]; then
     if ! iptables -L OUTPUT | grep -q "policy DROP"; then
         iptables -P INPUT DROP
         iptables -P OUTPUT DROP

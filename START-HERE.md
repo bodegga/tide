@@ -24,11 +24,11 @@ Then configure apps:
 - SOCKS5: `localhost:9050`
 - DNS: `localhost:9053`
 
-### 🚧 Forced Mode (Coming Soon)
+### 🚧 Killa Whale Mode (Coming Soon)
 Router + fail-closed firewall (no leaks possible)
 
 ### 🚧 Takeover Mode (Coming Soon)
-Forced + ARP hijacking (full network control)
+Killa Whale + ARP hijacking (full network control)
 
 ---
 
@@ -67,7 +67,7 @@ vim .env
 ```
 
 Settings:
-- `TIDE_MODE`: proxy, router, forced, takeover
+- `TIDE_MODE`: proxy, router, killa-whale, takeover
 - `TIDE_SECURITY`: standard, hardened, paranoid, bridges
 - `TIDE_GATEWAY_IP`: Gateway IP (default: 10.101.101.10)
 - `TIDE_SUBNET`: Network subnet (default: 10.101.101.0/24)
@@ -91,13 +91,13 @@ Settings:
 | Router Mode (DHCP + Transparent) | ✅ Working (Default) |
 | Client GUI Application | 🚧 v1.1 - In Development |
 | Takeover Mode (ARP hijack) | 🚧 v1.2 - In Development |
-| Forced Mode (Fail-closed) | 📋 v1.3 - Planned |
+| Killa Whale Mode (Fail-closed) | 📋 v1.3 - Planned |
 | VM Images (qcow2/OVA) | 📋 v1.5 - Planned |
 
 **Last tested:** Dec 9, 2025  
 **Test results:** DHCP + transparent routing fully working in Docker  
 **Current version:** 1.2.0  
-**Next release:** 1.3 (Forced Mode - fail-closed)
+**Next release:** 1.3 (Killa Whale Mode - fail-closed)
 
 See **[ROADMAP.md](ROADMAP.md)** for full development plan.
 
