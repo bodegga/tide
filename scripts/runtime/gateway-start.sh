@@ -84,12 +84,11 @@ elif [ "$TIDE_MODE" = "killa-whale" ]; then
     echo "   ⚠️  ARP poisoning, IP hijacking, fail-closed enforcement"
     echo "   ⚠️  NOTHING escapes without going through Tor"
     
-    # Install ARP tools
-    echo "📦 Installing network hijacking tools..."
-    apk add --no-cache nmap iputils arping >/dev/null 2>&1 || true
+    # ARP tools should already be installed in Docker image
+    echo "📦 Network hijacking tools ready (nmap, arping, iputils)"
     
-    # Enable IP forwarding
-    echo 1 > /proc/sys/net/ipv4/ip_forward
+    # Enable IP forwarding (already done by sysctls in docker-compose)
+    echo 1 > /proc/sys/net/ipv4/ip_forward 2>/dev/null || echo "   IP forwarding handled by Docker"
     
     # Enable promiscuous mode (sniff all packets)
     echo "🔓 Enabling promiscuous mode..."

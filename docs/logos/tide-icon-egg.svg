@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Icon: Egg + Wave Security Layers -->
+  
+  <!-- Background (Cream) -->
+  <rect width="512" height="512" fill="#F8F4E9"/>
+
+  <!-- Definitions -->
+  <defs>
+    <!-- The Egg Shape Path -->
+    <path id="egg-outline" d="M256,40 C366,40 456,160 456,290 C456,420 366,480 256,480 C146,480 56,420 56,290 C56,160 146,40 256,40 Z" />
+    
+    <!-- Clip Path based on the Egg -->
+    <clipPath id="clip-egg">
+      <use href="#egg-outline"/>
+    </clipPath>
+  </defs>
+
+  <!-- Internal Graphics (Clipped inside the egg) -->
+  <g clip-path="url(#clip-egg)">
+    <!-- Fill the egg interior with background color first -->
+    <rect width="512" height="512" fill="#F8F4E9"/>
+
+    <!-- Wave Layers - Representing "Tides" of Security -->
+    <!-- Bottom wave (darkest blue - deepest security layer) -->
+    <path d="M-50,420 Q100,380 256,400 T562,420 L562,600 L-50,600 Z" fill="#2b5a7a" />
+    
+    <!-- Middle wave (ocean blue) -->
+    <path d="M-50,340 Q100,300 256,330 T562,340 L562,600 L-50,600 Z" fill="#3D7297" />
+    
+    <!-- Upper wave (lighter blue - surface layer) -->
+    <path d="M-50,260 Q100,220 256,250 T562,260 L562,600 L-50,600 Z" fill="#5a8cb5" />
+    
+    <!-- Top wave with golden crest (mustard - Bodega accent) -->
+    <path d="M-50,180 Q100,140 256,170 T562,180 L562,210 L-50,210 Z" fill="#F2B03D" />
+    
+    <!-- Wave outlines for definition -->
+    <path d="M-50,420 Q100,380 256,400 T562,420" fill="none" stroke="#131313" stroke-width="8" opacity="0.3"/>
+    <path d="M-50,340 Q100,300 256,330 T562,340" fill="none" stroke="#131313" stroke-width="10" opacity="0.4"/>
+    <path d="M-50,260 Q100,220 256,250 T562,260" fill="none" stroke="#131313" stroke-width="12" opacity="0.5"/>
+    <path d="M-50,180 Q100,140 256,170 T562,180" fill="none" stroke="#131313" stroke-width="14"/>
+  </g>
+
+  <!-- Main Outline (Stroked on top of everything) -->
+  <use href="#egg-outline" fill="none" stroke="#131313" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

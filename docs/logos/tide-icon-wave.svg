@@ -1,0 +1,61 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Icon: Wave Silhouette with Bodega Security Layers -->
+  
+  <!-- Background (Cream) -->
+  <rect width="512" height="512" fill="#F8F4E9"/>
+
+  <!-- Definitions -->
+  <defs>
+    <!-- The Wave Shape Path - Classic ocean wave curl -->
+    <path id="wave-outline" d="
+      M 50,300 
+      Q 80,250 120,260 
+      Q 160,270 180,240 
+      Q 200,210 240,220 
+      Q 280,230 320,180 
+      Q 360,130 400,160 
+      Q 420,175 440,150 
+      L 460,160 
+      L 460,400 
+      Q 460,450 410,460 
+      L 100,460 
+      Q 50,450 50,400 
+      Z" 
+    />
+    
+    <!-- Clip Path based on the Wave -->
+    <clipPath id="clip-wave">
+      <use href="#wave-outline"/>
+    </clipPath>
+  </defs>
+
+  <!-- Internal Graphics (Clipped inside the wave) -->
+  <g clip-path="url(#clip-wave)">
+    <!-- Fill wave interior with gradient background -->
+    <defs>
+      <linearGradient id="ocean-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#5a8cb5;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#3D7297;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#2b5a7a;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    
+    <rect width="512" height="512" fill="url(#ocean-gradient)"/>
+
+    <!-- Security Layer Lines (Bodega style - horizontal parallel lines) -->
+    <!-- These represent layers of protection, like the egg shell layers -->
+    <line x1="40" y1="200" x2="470" y2="200" stroke="#F8F4E9" stroke-width="10" opacity="0.8"/>
+    <line x1="40" y1="235" x2="470" y2="235" stroke="#F8F4E9" stroke-width="9" opacity="0.7"/>
+    <line x1="40" y1="270" x2="470" y2="270" stroke="#F8F4E9" stroke-width="9" opacity="0.7"/>
+    <line x1="40" y1="305" x2="470" y2="305" stroke="#F8F4E9" stroke-width="9" opacity="0.7"/>
+    <line x1="40" y1="340" x2="470" y2="340" stroke="#F8F4E9" stroke-width="9" opacity="0.7"/>
+    <line x1="40" y1="375" x2="470" y2="375" stroke="#F8F4E9" stroke-width="9" opacity="0.7"/>
+    
+    <!-- Golden accent line (Tide crest) -->
+    <line x1="40" y1="410" x2="470" y2="410" stroke="#F2B03D" stroke-width="14" opacity="0.9"/>
+  </g>
+
+  <!-- Main Wave Outline (Stroked on top of everything) -->
+  <use href="#wave-outline" fill="none" stroke="#131313" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

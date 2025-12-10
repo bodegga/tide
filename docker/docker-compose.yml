@@ -23,6 +23,13 @@ services:
       - NET_ADMIN
     sysctls:
       - net.ipv4.ip_forward=1
+    environment:
+      - TIDE_MODE=${TIDE_MODE:-router}
+      - TIDE_SECURITY=${TIDE_SECURITY:-standard}
+      - TIDE_GATEWAY_IP=${TIDE_GATEWAY_IP:-10.101.101.10}
+      - TIDE_SUBNET=${TIDE_SUBNET:-10.101.101.0/24}
+      - TIDE_DHCP_START=${TIDE_DHCP_START:-10.101.101.100}
+      - TIDE_DHCP_END=${TIDE_DHCP_END:-10.101.101.200}
     networks:
       tidenet:
         ipv4_address: ${TIDE_GATEWAY_IP:-10.101.101.10}

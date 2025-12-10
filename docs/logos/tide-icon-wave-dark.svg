@@ -1,0 +1,48 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Icon: Dark Wave for Light Backgrounds -->
+  
+  <!-- Background (Transparent) -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <!-- Definitions -->
+  <defs>
+    <!-- Bold Wave Shape -->
+    <path id="wave-outline" d="
+      M 70,310 
+      Q 110,260 150,280 
+      Q 190,300 230,250 
+      Q 270,200 310,190 
+      Q 350,180 390,200 
+      Q 430,220 460,190 
+      L 470,195 
+      L 470,430 
+      Q 466,470 430,475 
+      L 110,475 
+      Q 74,470 70,430 
+      Z" 
+    />
+    
+    <clipPath id="clip-wave">
+      <use href="#wave-outline"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fill wave with deep void black -->
+  <use href="#wave-outline" fill="#0d0d0d"/>
+
+  <!-- Internal Graphics -->
+  <g clip-path="url(#clip-wave)">
+    <!-- Security Layer Lines (white on dark) -->
+    <line x1="70" y1="250" x2="470" y2="250" stroke="#ffffff" stroke-width="11" opacity="0.25"/>
+    <line x1="70" y1="290" x2="470" y2="290" stroke="#ffffff" stroke-width="10" opacity="0.22"/>
+    <line x1="70" y1="330" x2="470" y2="330" stroke="#ffffff" stroke-width="10" opacity="0.22"/>
+    <line x1="70" y1="370" x2="470" y2="370" stroke="#ffffff" stroke-width="10" opacity="0.22"/>
+    
+    <!-- Golden accent line -->
+    <line x1="70" y1="410" x2="470" y2="410" stroke="#F2B03D" stroke-width="15" opacity="0.8"/>
+  </g>
+
+  <!-- Main Wave Outline -->
+  <use href="#wave-outline" fill="none" stroke="#131313" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

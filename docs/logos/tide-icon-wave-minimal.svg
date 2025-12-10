@@ -1,0 +1,50 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tide Icon: Clean Wave Silhouette with Security Layers -->
+  
+  <!-- Background (Transparent for app icons) -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <!-- Definitions -->
+  <defs>
+    <!-- Smoother Wave Shape - Classic breaker wave -->
+    <path id="wave-outline" d="
+      M 60,320 
+      Q 100,280 140,295 
+      Q 180,310 220,270 
+      Q 260,230 300,200 
+      Q 340,170 380,185 
+      Q 420,200 450,175 
+      L 460,180 
+      L 460,420 
+      Q 456,460 420,465 
+      L 100,465 
+      Q 64,460 60,420 
+      Z" 
+    />
+    
+    <!-- Clip Path -->
+    <clipPath id="clip-wave">
+      <use href="#wave-outline"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fill wave with solid ocean blue -->
+  <use href="#wave-outline" fill="#3D7297"/>
+
+  <!-- Internal Graphics (Clipped inside the wave) -->
+  <g clip-path="url(#clip-wave)">
+    <!-- Security Layer Lines (Bodega style) -->
+    <line x1="60" y1="240" x2="460" y2="240" stroke="#F8F4E9" stroke-width="12" opacity="0.7"/>
+    <line x1="60" y1="275" x2="460" y2="275" stroke="#F8F4E9" stroke-width="10" opacity="0.6"/>
+    <line x1="60" y1="310" x2="460" y2="310" stroke="#F8F4E9" stroke-width="10" opacity="0.6"/>
+    <line x1="60" y1="345" x2="460" y2="345" stroke="#F8F4E9" stroke-width="10" opacity="0.6"/>
+    <line x1="60" y1="380" x2="460" y2="380" stroke="#F8F4E9" stroke-width="10" opacity="0.6"/>
+    
+    <!-- Golden accent (wave crest highlight) -->
+    <line x1="60" y1="415" x2="460" y2="415" stroke="#F2B03D" stroke-width="16" opacity="0.85"/>
+  </g>
+
+  <!-- Main Wave Outline -->
+  <use href="#wave-outline" fill="none" stroke="#131313" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>
