@@ -5,7 +5,7 @@ set -e
 
 TEMPLATE_PATH="$HOME/Parallels/Tide-Gateway-TEMPLATE.pvm"
 OUTPUT_DIR="$(pwd)/releases"
-VERSION="v1.0.0"
+VERSION="v1.2.0"
 
 echo "🌊 Packaging Tide Gateway Template"
 echo "===================================="

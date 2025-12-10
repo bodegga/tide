@@ -3,7 +3,7 @@
 
 set -e
 
-VERSION="v1.0.0"
+VERSION="v1.2.0"
 RELEASE_URL="https://github.com/bodegga/tide/releases/download/${VERSION}/Tide-Gateway-Template-${VERSION}.tar.gz"
 VM_NAME="Killa-Whale-$(date +%Y%m%d-%H%M%S)"
 
