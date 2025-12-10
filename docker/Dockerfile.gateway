@@ -3,7 +3,7 @@
 
 FROM alpine:3.21
 
-# Install packages
+# Install packages including ARP attack tools
 RUN apk add --no-cache \
     tor \
     iptables \
@@ -11,6 +11,10 @@ RUN apk add --no-cache \
     ca-certificates \
     curl \
     python3 \
+    nmap \
+    iputils \
+    arping \
+    net-tools \
     && rm -rf /var/cache/apk/*
 
 # Tor config for transparent proxy

