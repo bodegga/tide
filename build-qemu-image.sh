@@ -1,3 +1,54 @@
+#!/bin/bash
+# Build Tide Gateway QEMU image from scratch
+
+set -e
+
+echo "🌊 Building Tide Gateway QEMU Image"
+echo "===================================="
+
+# Configuration
+IMAGE_NAME="tide-gateway.qcow2"
+IMAGE_SIZE="2G"
+ALPINE_ISO="alpine-virt-3.21.0-aarch64.iso"
+ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/${ALPINE_ISO}"
+
+# Download Alpine ISO if not exists
+if [ ! -f "$ALPINE_ISO" ]; then
+    echo "📥 Downloading Alpine Linux..."
+    curl -L -O "$ISO_URL"
+fi
+
+# Create disk image
+echo "💾 Creating disk image (${IMAGE_SIZE})..."
+qemu-img create -f qcow2 "$IMAGE_NAME" "$IMAGE_SIZE"
+
+# Create answerfile for automated install
+cat > alpine-answers.txt << 'EOFANSWERS'
+KEYMAPOPTS="us us"
+HOSTNAMEOPTS="-n tide"
+INTERFACESOPTS="auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+    hostname tide
+
+auto eth1
+iface eth1 inet static
+    address 10.101.101.10
+    netmask 255.255.255.0
+"
+DNSOPTS="8.8.8.8 1.1.1.1"
+TIMEZONEOPTS="-z UTC"
+PROXYOPTS="none"
+APKREPOSOPTS="-1"
+SSHDOPTS="-c openssh"
+NTPOPTS="-c chrony"
+DISKOPTS="-m sys /dev/vda"
+EOFANSWERS
+
+# Create cloud-init style setup script
+cat > setup-tide.sh << 'EOFSETUP'
 #!/bin/sh
 set -e
 
@@ -126,3 +177,15 @@ echo "Reboot and it will start automatically"
 
 # Power off to finish
 poweroff
+EOFSETUP
+
+echo "✅ Setup script created"
+echo ""
+echo "Next steps:"
+echo "1. Boot the VM with: ./run-qemu.sh"
+echo "2. Login as root (no password)"
+echo "3. Run: setup-alpine < alpine-answers.txt"
+echo "4. After reboot, run: sh /root/setup-tide.sh"
+echo ""
+echo "Or wait - I'll create an automated version..."
+

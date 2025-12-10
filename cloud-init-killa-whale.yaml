@@ -1,0 +1,73 @@
+#cloud-config
+# Automated Killa Whale deployment for Alpine Linux
+
+hostname: tide-killa-whale
+fqdn: tide-killa-whale.local
+
+users:
+  - name: root
+    lock_passwd: false
+    plain_text_passwd: tide
+    sudo: ALL=(ALL) NOPASSWD:ALL
+
+timezone: America/Los_Angeles
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - bash
+  - curl
+  - tor
+  - iptables
+  - dnsmasq
+  - nmap
+  - iputils
+  - net-tools
+
+runcmd:
+  # Clone Tide repository
+  - cd /root
+  - git clone https://github.com/bodegga/tide.git
+  
+  # Create auto-install config
+  - mkdir -p /etc/tide
+  - echo "killa-whale" > /etc/tide/mode
+  - echo "standard" > /etc/tide/security
+  
+  # Run Tide installer non-interactively
+  - cd /root/tide
+  - TIDE_MODE=killa-whale TIDE_SECURITY=standard ./tide-install.sh --auto
+  
+  # Enable and start service
+  - rc-update add tide-gateway default
+  - rc-service tide-gateway start
+  
+  # Log that we're done
+  - echo "🐋 KILLA WHALE DEPLOYED - CHECK LOGS" > /root/DEPLOYMENT-COMPLETE.txt
+
+write_files:
+  - path: /root/KILLA-WHALE-README.txt
+    content: |
+      🐋 KILLA WHALE MODE - DEPLOYED AUTOMATICALLY
+      ============================================
+      
+      This VM was auto-configured via cloud-init.
+      
+      Check status:
+        rc-service tide-gateway status
+      
+      View logs:
+        tail -f /var/log/tide/gateway.log
+      
+      Expected output:
+        🐋 Mode: KILLA WHALE - AGGRESSIVE NETWORK TAKEOVER
+      
+      Named after Andre Nickatina - Bay Area legend 🎤
+
+power_state:
+  mode: reboot
+  message: "Killa Whale installation complete, rebooting..."
+  timeout: 300
+  condition: true
