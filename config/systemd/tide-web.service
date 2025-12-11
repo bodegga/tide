@@ -1,8 +1,9 @@
 [Unit]
 Description=Tide Gateway Web Dashboard
 Documentation=https://github.com/bodegga/tide
-After=network.target tor.service
+After=network.target tor.service nginx.service
 Wants=tor.service
+Requires=nginx.service
 
 [Service]
 Type=simple
@@ -20,8 +21,8 @@ StandardError=null
 NoNewPrivileges=true
 PrivateTmp=true
 
-# Port 80 requires CAP_NET_BIND_SERVICE capability
-AmbientCapabilities=CAP_NET_BIND_SERVICE
+# Port 8080 (internal) - nginx proxies port 80 externally
+# No special capabilities needed for non-privileged port
 
 [Install]
 WantedBy=multi-user.target

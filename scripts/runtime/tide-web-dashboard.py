@@ -2,7 +2,8 @@
 """
 Tide Web Dashboard
 ==================
-Serves web-based status dashboard on port 80.
+Serves web-based status dashboard on port 8080 (internal).
+Nginx reverse proxy serves port 80 (external).
 Accessible at http://tide.bodegga.net or http://10.101.101.10
 
 Aggressive Killa Whale mode: DNS hijacking forces tide.bodegga.net → 10.101.101.10
@@ -16,7 +17,7 @@ import os
 import time
 from urllib.parse import urlparse
 
-PORT = 80
+PORT = 8080  # Internal port (nginx proxies 80 → 8080)
 
 
 class TideWebHandler(http.server.BaseHTTPRequestHandler):
