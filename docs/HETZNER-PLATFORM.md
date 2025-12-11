@@ -8,11 +8,12 @@
 
 1. [Why Hetzner for Tide Gateway](#why-hetzner-for-tide-gateway)
 2. [Current Testing Usage](#current-testing-usage)
-3. [Future Migration Plans](#future-migration-plans)
-4. [Hetzner Setup Guide](#hetzner-setup-guide)
-5. [Server Types & Pricing](#server-types--pricing)
-6. [Automated Testing Workflow](#automated-testing-workflow)
-7. [Manual Testing on Hetzner](#manual-testing-on-hetzner)
+3. [Matrix Testing](#matrix-testing)
+4. [Future Migration Plans](#future-migration-plans)
+5. [Hetzner Setup Guide](#hetzner-setup-guide)
+6. [Server Types & Pricing](#server-types--pricing)
+7. [Automated Testing Workflow](#automated-testing-workflow)
+8. [Manual Testing on Hetzner](#manual-testing-on-hetzner)
 
 ---
 
@@ -114,6 +115,60 @@ cd ~/Documents/Personal-Projects/tide/testing
 5. Dashboard generated with combined results
 
 **Benefit:** No time penalty - total runtime is ~5 minutes (same as Hetzner alone).
+
+---
+
+## Matrix Testing
+
+**NEW:** Comprehensive hardware and OS compatibility testing.
+
+### What is Matrix Testing?
+
+Matrix testing validates Tide Gateway across **all combinations** of:
+- **Server types:** CPX (ARM shared), CAX (ARM dedicated), CX (x86)
+- **Operating systems:** Ubuntu 22.04/24.04, Debian 12, Fedora 40
+- **All modes:** proxy, router, killa-whale
+- **Full stack:** Tor, services, API, mode switching
+
+### Run Matrix Tests
+
+```bash
+cd ~/Documents/Personal-Projects/tide/testing
+
+# Preview test matrix
+./orchestrate-tests.sh matrix --dry-run
+
+# Quick validation (3 configs: CPX11, CX22, CAX11 × Ubuntu 22.04)
+./orchestrate-tests.sh matrix --quick
+
+# Medium test (8 configs: high-priority servers × Ubuntu/Debian)
+./orchestrate-tests.sh matrix --medium
+
+# Full matrix (30 configs: all servers × all OS)
+./orchestrate-tests.sh matrix --full
+```
+
+### Cost Estimates
+
+| Mode | Configurations | Duration | Cost | When to Use |
+|------|----------------|----------|------|-------------|
+| `--quick` | 3 | ~15 min | $0.03 | Weekly validation |
+| `--medium` | 8 | ~40 min | $0.08 | Pre-release testing |
+| `--full` | 30 | ~2.5 hrs | $0.30 | Major releases |
+
+### Results
+
+Matrix tests generate:
+- **Compatibility matrix** showing what works on what hardware
+- **Performance benchmarks** per configuration
+- **Cost analysis** for each server type
+- **Recommendations** for production deployment
+
+Results saved to: `testing/results/matrix-TIMESTAMP/MATRIX-REPORT.md`
+
+### Documentation
+
+Full hardware compatibility matrix: `docs/HARDWARE-COMPATIBILITY.md`
 
 ---
 

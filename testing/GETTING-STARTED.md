@@ -41,7 +41,39 @@ pwd | grep -q "tide/testing" && echo "✅ In testing directory" || cd ~/Document
 
 ---
 
-## Three Ways To Test
+## Four Ways To Test
+
+### 🏆 Option 0: Matrix Testing (Complete Hardware/OS Validation)
+
+**Best for:** Pre-release validation, comprehensive compatibility testing  
+**Time:** 15 min (quick) to 2.5 hrs (full)  
+**Cost:** $0.03 (quick) to $0.30 (full)  
+**What it tests:** All hardware/OS combinations
+
+**Matrix testing runs Tide Gateway on multiple cloud server types and operating systems to ensure compatibility.**
+
+```bash
+cd ~/Documents/Personal-Projects/tide/testing
+
+# Preview what will be tested
+./orchestrate-tests.sh matrix --dry-run
+
+# Quick test (3 configs: CPX11, CX22, CAX11 × Ubuntu 22.04)
+./orchestrate-tests.sh matrix --quick
+
+# Full test (30 configs: all servers × all OS)
+./orchestrate-tests.sh matrix --full
+```
+
+**When to use:**
+- ✅ Before major releases
+- ✅ Testing new OS versions
+- ✅ Validating ARM vs x86 compatibility
+- ✅ Quarterly compatibility audits
+
+**See:** `docs/HARDWARE-COMPATIBILITY.md` for full compatibility matrix
+
+---
 
 ### 🥇 Option 1: Hetzner Cloud (Recommended - Real Hardware)
 

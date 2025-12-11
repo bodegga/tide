@@ -14,8 +14,10 @@ NC='\033[0m'
 TIDE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SERVER_NAME="tide-test-$(date +%s)"
 LOCATION="hil"  # Hillsboro, OR (closest to Petaluma/Bay Area)
-SERVER_TYPE="cpx11"  # AMD, 2 vCPU, 2GB RAM, €0.0054/hr (~$0.006/hr) - available in US
-IMAGE="ubuntu-22.04"  # Ubuntu has better package support than Alpine for quick testing
+
+# Accept parameters for matrix testing
+SERVER_TYPE="${1:-cpx11}"  # Default: cpx11 (ARM, 2 vCPU, 2GB RAM, €0.0054/hr)
+IMAGE="${2:-ubuntu-22.04}"  # Default: Ubuntu 22.04 (best package support)
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🌊 Tide Gateway - Hetzner Cloud Testing"
@@ -34,9 +36,9 @@ fi
 
 echo -e "${CYAN}Configuration:${NC}"
 echo "  Server: $SERVER_NAME"
-echo "  Type: $SERVER_TYPE (ARM, 4GB RAM)"
-echo "  Location: $LOCATION (Ashburn, VA)"
-echo "  Cost: ~€0.0072/hr (~$0.008/hr)"
+echo "  Type: $SERVER_TYPE"
+echo "  Image: $IMAGE"
+echo "  Location: $LOCATION (Hillsboro, OR)"
 echo ""
 
 # Check if SSH key exists

@@ -126,10 +126,32 @@ cd testing/hypervisors
 
 ---
 
+## Matrix Testing (Hardware/OS Compatibility)
+
+**NEW:** Comprehensive testing across multiple server types and operating systems.
+
+```bash
+cd testing
+./orchestrate-tests.sh matrix --dry-run   # Preview test matrix
+./orchestrate-tests.sh matrix --quick     # 3 high-priority configs (~$0.03)
+./orchestrate-tests.sh matrix --full      # All 30 configs (~$0.30)
+```
+
+**Tests combinations of:**
+- Server types: CPX11 (ARM), CX22 (x86), CAX11 (ARM dedicated), etc.
+- OS: Ubuntu 22.04/24.04, Debian 12, Fedora 40
+- All modes: proxy, router, killa-whale
+- Full validation: Tor, services, API, mode switching
+
+**See:** `docs/HARDWARE-COMPATIBILITY.md` for compatibility matrix
+
+---
+
 ## Test Matrix
 
 | Platform | Mode | Status | Automation | Runtime | Cost |
 |----------|------|--------|------------|---------|------|
+| **Matrix** | All modes | ✅ Working | Full | 15min-2.5hr | $0.03-0.30 |
 | **Docker** | Proxy | ✅ Working | Full | 2-3 min | Free |
 | **Docker** | Router | ✅ Working | Full | 2-3 min | Free |
 | **Docker** | Killa Whale | ❌ Not supported | N/A | N/A | Free |

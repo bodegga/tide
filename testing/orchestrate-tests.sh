@@ -422,6 +422,18 @@ case "${1:-run}" in
         run_parallel_tests
         display_summary
         ;;
+    matrix)
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🌊 TIDE GATEWAY - MATRIX TESTING MODE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo -e "${CYAN}Launching matrix testing...${NC}"
+        echo ""
+        
+        # Shift to pass remaining arguments to test-matrix.sh
+        shift
+        "$TESTING_DIR/cloud/test-matrix.sh" "$@"
+        ;;
     latest)
         show_latest
         ;;
@@ -441,16 +453,30 @@ case "${1:-run}" in
         echo ""
         echo "Commands:"
         echo "  run              Run all tests in parallel (default)"
+        echo "  matrix [mode]    Run matrix testing across hardware/OS combinations"
         echo "  latest           Show latest test results"
         echo "  list             List all test sessions"
         echo "  show <session>   Show specific session results"
         echo "  clean [N]        Keep last N sessions, delete older (default: 10)"
         echo ""
+        echo "Matrix Modes:"
+        echo "  --dry-run        Show what would be tested"
+        echo "  --quick          Test high-priority configs (3 tests, ~\$0.03)"
+        echo "  --medium         Test high + medium priority (8 tests, ~\$0.08)"
+        echo "  --full           Test all combinations (30 tests, ~\$0.30)"
+        echo ""
         echo "Examples:"
-        echo "  $0                    # Run tests"
-        echo "  $0 latest             # Show latest results"
-        echo "  $0 list               # List all sessions"
-        echo "  $0 show 20241210-153045"
-        echo "  $0 clean 5            # Keep only last 5 sessions"
+        echo "  $0                       # Run standard tests (Docker + Hetzner)"
+        echo "  $0 matrix --dry-run      # Preview matrix testing"
+        echo "  $0 matrix --quick        # Quick matrix validation"
+        echo "  $0 matrix --full         # Full hardware compatibility test"
+        echo "  $0 latest                # Show latest results"
+        echo "  $0 list                  # List all sessions"
+        echo "  $0 show 20241210-153045  # Show specific session"
+        echo "  $0 clean 5               # Keep only last 5 sessions"
+        echo ""
+        echo "More info:"
+        echo "  Matrix testing: testing/cloud/test-matrix.sh --help"
+        echo "  Compatibility: docs/HARDWARE-COMPATIBILITY.md"
         ;;
 esac
