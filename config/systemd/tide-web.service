@@ -1,0 +1,23 @@
+[Unit]
+Description=Tide Gateway Web Dashboard
+Documentation=https://github.com/bodegga/tide
+After=network.target tor.service
+Wants=tor.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/tide
+ExecStart=/usr/bin/python3 /opt/tide/scripts/runtime/tide-web-dashboard.py
+Restart=always
+RestartSec=10
+# ZERO-LOG POLICY: No logging for privacy (Tide is a privacy appliance)
+StandardOutput=null
+StandardError=null
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

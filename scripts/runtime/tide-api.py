@@ -33,21 +33,23 @@ if not API_TOKEN:
             with open(token_file, 'w') as f:
                 f.write(API_TOKEN)
             os.chmod(token_file, 0o600)
-            print(f"🔑 Generated API token saved to {token_file}")
+            # ZERO-LOG: Don't print tokens or paths
         else:
             with open(token_file, 'r') as f:
                 API_TOKEN = f.read().strip()
     except:
-        print("⚠️  Warning: Could not persist API token, using ephemeral token")
+        # ZERO-LOG: No warnings that could reveal system state
+        pass
 
-print(f"🔒 API Token: {API_TOKEN}")
+# ZERO-LOG: Never print API tokens
 
 
 class TideAPIHandler(http.server.BaseHTTPRequestHandler):
     """Handle Tide API requests"""
     
     def log_message(self, format, *args):
-        """Override to reduce logging noise"""
+        """ZERO-LOG POLICY: No request logging for privacy"""
+        # Tide Gateway is a privacy appliance - we NEVER log client IPs or requests
         pass
     
     def _send_json(self, code, data):

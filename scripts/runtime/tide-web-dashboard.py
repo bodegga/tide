@@ -23,10 +23,10 @@ class TideWebHandler(http.server.BaseHTTPRequestHandler):
     """Handle web dashboard requests"""
     
     def log_message(self, format, *args):
-        """Override to reduce logging noise"""
-        # Only log actual requests (not health checks)
-        if '/health' not in self.path:
-            print(f"🌐 {self.client_address[0]} - {format % args}")
+        """ZERO-LOG POLICY: No request logging for privacy"""
+        # Tide Gateway is a privacy appliance - we NEVER log client IPs or requests
+        # This maintains user anonymity and security
+        pass
     
     def _send_html(self, code, html):
         """Send HTML response"""

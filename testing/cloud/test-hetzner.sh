@@ -110,18 +110,28 @@ git clone -q https://github.com/bodegga/tide.git
 
 echo "→ Installing Tide components..."
 cd tide
-cp scripts/runtime/tide-web-dashboard.py /usr/local/bin/
+mkdir -p /opt/tide
+cp -r scripts /opt/tide/
+cp -r config /opt/tide/
+
+# Install CLI tools in PATH
 cp scripts/runtime/tide-cli.sh /usr/local/bin/
 cp scripts/runtime/tide-config.sh /usr/local/bin/
-cp scripts/runtime/gateway-start.sh /usr/local/bin/
-
-chmod +x /usr/local/bin/tide-*.py /usr/local/bin/tide-*.sh /usr/local/bin/gateway-start.sh
+chmod +x /usr/local/bin/tide-*.sh
 ln -sf /usr/local/bin/tide-cli.sh /usr/local/bin/tide
 
-echo "→ Configuring Tor..."
-systemctl enable tor >/dev/null 2>&1 || true
+echo "→ Installing systemd services..."
+cp config/systemd/tide-web.service /etc/systemd/system/
+cp config/systemd/tide-api.service /etc/systemd/system/
+systemctl daemon-reload
 
-echo "✓ Tide Gateway installed (services not started yet)"
+echo "→ Enabling and starting services..."
+systemctl enable tide-web tide-api tor
+systemctl start tor
+sleep 5  # Let Tor start
+systemctl start tide-web tide-api
+
+echo "✓ Tide Gateway installed and services started"
 EOFINSTALL
 
 echo -e "${GREEN}✓ Tide installed${NC}"
