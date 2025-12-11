@@ -166,6 +166,11 @@ set -e
 apt-get update -qq
 apt-get install -y iptables dnsmasq >/dev/null 2>&1
 
+# Fix systemd-resolved port conflict (blocks dnsmasq port 53)
+systemctl stop systemd-resolved
+systemctl disable systemd-resolved
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
 # Enable IP forwarding
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
@@ -234,10 +239,12 @@ echo ""
 echo -e "${CYAN}[10/12] Configuring VICTIM DEVICE...${NC}"
 ssh -o StrictHostKeyChecking=no root@"$VICTIM_IP" bash << EOFVICTIM
 set -e
-apt-get update -qq
-apt-get install -y curl tcpdump net-tools >/dev/null 2>&1
 
-# Set real gateway as default
+# Install packages FIRST (before routing changes)
+apt-get update -qq
+apt-get install -y curl tcpdump net-tools traceroute >/dev/null 2>&1
+
+# THEN modify routing
 ip route del default || true
 ip route add default via $GATEWAY_PRIVATE
 
