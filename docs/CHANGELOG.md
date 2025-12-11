@@ -7,19 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
-- Client GUI applications (native desktop apps)
-- Advanced ARP takeover mode refinements
-- Bridge relay support for censored regions
-- Interactive circuit control (select exit country)
-- Bandwidth usage graphs
-- WebSocket live updates
-
----
-
-## [1.2.0] - 2025-12-10
-
-### Added
+### Planned Features (v1.2.0)
 - **Web Dashboard** - Full-featured status interface at http://tide.bodegga.net
   - Real-time Tor connection status with visual indicators
   - Mode, security profile, and uptime display
@@ -29,10 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Network health monitoring
   - Auto-refresh every 30 seconds
   - Mobile-responsive dark theme UI
-- **Aggressive DNS Hijacking** - tide.bodegga.net ALWAYS resolves to 10.101.101.10
-  - dnsmasq configuration with address hijacking
-  - iptables enforcement in Killa Whale mode (no escape)
-  - Works like commercial routers (Ubiquiti, Netgear approach)
 - **Enhanced CLI Tool** - Comprehensive `tide` command
   - `tide status` - Full gateway status with colored output
   - `tide check` - Verify Tor connectivity
@@ -43,61 +27,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `tide logs` - View Tor logs
   - `tide web` - Show dashboard URL
   - `tide help` - Command reference
-- **Network Health Monitoring**
-  - Connected client tracking
-  - ARP poisoning process monitoring
-  - Network scanner status
-  - Real-time statistics
 - **JSON API Enhancements**
   - `/api/status` - Full gateway status endpoint
   - `/health` - Simple health check
   - Enhanced circuit information
   - Network statistics included
 
-### Changed
-- **gateway-start.sh** - Now starts web dashboard server on port 80
-- **dnsmasq configuration** - Added DNS hijacking for tide.bodegga.net
-- **README.md** - Added Web Dashboard section with usage examples
-- Service startup order optimized for dashboard availability
+**Note:** Features above are in git but not yet in VM template. Will be released as v1.2.0 when template is rebuilt.
 
-### Technical Details
-- **Web Server**: Python3 http.server (lightweight, no dependencies)
-- **Dashboard Port**: 80 (HTTP)
-- **API Port**: 9051 (JSON endpoints)
-- **DNS Hijacking**: dnsmasq `address=/tide.bodegga.net/10.101.101.10`
-- **Killa Whale Enforcement**: iptables redirects all DNS to gateway
-- **CLI Tool**: Shell script with ANSI color support
-- **Auto-refresh**: JavaScript 30-second interval
-
-### Documentation
-- New file: `WEB-DASHBOARD-README.md` - Complete dashboard guide
-- New file: `UPDATE-TO-V1.2.sh` - Upgrade script for existing deployments
-- Updated: `README.md` with web dashboard section
-
-### Upgrade Path
-For existing v1.1.x deployments:
-```bash
-wget -O- https://raw.githubusercontent.com/bodegga/tide/main/UPDATE-TO-V1.2.sh | sh
-```
+### Developer Tools
+- Client GUI applications (native desktop apps)
+- Advanced ARP takeover mode refinements
+- Bridge relay support for censored regions
+- Interactive circuit control (select exit country)
+- Bandwidth usage graphs
+- WebSocket live updates
 
 ---
 
-## [1.1.1] - 2025-12-09
+## [1.1.2] - 2025-12-10
 
 ### Added
-- **ONE-COMMAND deployment** - `curl -sSL https://tide.bodegga.net/deploy | bash`
-- Working Parallels VM template (192MB compressed, 379MB extracted)
-- Automated VM creation and provisioning via `prlctl`
-- Killa Whale mode fully operational with:
-  - ARP poisoning for network takeover
-  - Tor transparent proxy (port 9040)
-  - DHCP server (10.101.101.100-200 range)
-  - DNS over Tor (port 5353)
-  - Fail-closed firewall (blocks all non-Tor traffic)
-- Comprehensive deployment scripts:
-  - `ONE-COMMAND-DEPLOY.sh` - Download and deploy instantly
-  - `DEPLOY-TEMPLATE.sh` - Clone pre-built template and start
-  - `PACKAGE-RELEASE.sh` - Package template for GitHub releases
+- **Test Orchestration System** - Parallel testing across platforms
+  - Docker testing (2-3 min, free)
+  - Hetzner Cloud testing (5 min, ~$0.01 per test)
+  - QEMU and VirtualBox support
+  - Automated result aggregation
+  - Visual HTML dashboards
+- **Test Validation Framework** - Ensures tests match features
+  - TEST-SPEC.yml specification system
+  - Automated version consistency checking
+  - Feature coverage validation
+  - CHANGELOG alignment verification
+- **Comprehensive Testing Documentation**
+  - Multi-platform testing guides
+  - Test maintenance workflow
+  - Platform comparison matrix
+  - Quick start guides
+
+### Changed
+- **Repository Organization** - Enforced file structure
+  - Moved scripts to proper directories
+  - GitHub Actions workflow for organization checks
+  - Cleaned up root directory
+- **Privacy & Security** - Removed personal info from public repo
+  - IDEAS.md now local-only (gitignored)
+  - Sanitized personal paths from archive scripts
+  - Updated workflow to prevent future leaks
+
+### Documentation
+- Complete version history (VERSION-HISTORY.md)
+- Test maintenance guide (TEST-MAINTENANCE.md)
+- Testing quick start (GETTING-STARTED.md)
+- Test orchestration documentation
+- Platform testing comparison
+
+### Technical Details
+- **Testing cost:** ~$3/year for comprehensive cloud testing
+- **Parallel execution:** Saves 2-3 minutes vs sequential
+- **Bash 3.2 compatible:** Works on macOS default shell
+- **CI/CD ready:** JSON output and exit codes
+
+**Note:** This release focuses on developer/testing infrastructure. User-facing features (web dashboard, CLI) are in development for v1.2.0.
+
+---
   - `FINAL-INSTALL.sh` - Install Tide in fresh Alpine VM
   - `CLEAN-DEPLOY.sh` - Convert fresh Alpine to Tide Gateway
 - Documentation suite:

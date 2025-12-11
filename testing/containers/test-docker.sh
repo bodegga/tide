@@ -12,7 +12,7 @@ CYAN='\033[0;36m'
 PURPLE='\033[0;35m'
 NC='\033[0m'
 
-TIDE_VERSION="1.2.0"
+TIDE_VERSION="1.1.2"
 CONTAINER_NAME="tide-test-$(date +%s)"
 NETWORK_NAME="tide-test-net"
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
