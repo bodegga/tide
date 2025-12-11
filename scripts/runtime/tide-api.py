@@ -101,6 +101,14 @@ class TideAPIHandler(http.server.BaseHTTPRequestHandler):
         except:
             return "standard"
     
+    def _get_version(self):
+        """Get Tide version"""
+        try:
+            with open('/opt/tide/VERSION', 'r') as f:
+                return f.read().strip()
+        except:
+            return "unknown"
+    
     def _get_circuit_info(self):
         """Get current Tor exit IP info"""
         try:
@@ -138,7 +146,7 @@ class TideAPIHandler(http.server.BaseHTTPRequestHandler):
         if path == '/status':
             self._send_json(200, {
                 "gateway": "tide",
-                "version": "1.2",
+                "version": self._get_version(),
                 "mode": self._get_mode(),
                 "security": self._get_security(),
                 "tor": self._tor_status(),
@@ -167,25 +175,16 @@ class TideAPIHandler(http.server.BaseHTTPRequestHandler):
             self._send_json(200, {"success": success})
         
         elif path == '/check':
-            result = self._get_circuit_info()
-            if result.get("IsTor"):
-                self._send_json(200, result)
-            else:
-                self._send_json(503, {"IsTor": False})
-        
-        elif path == '/token':
-            # Return API token for authenticated operations
-            # This is accessible to anyone on the network, which is OK
-            # because the network is assumed to be trusted (Docker/VM network)
+            # Quick health check endpoint
             self._send_json(200, {
-                "token": API_TOKEN,
-                "note": "Use as 'Authorization: Bearer <token>' header"
+                "status": "ok",
+                "version": self._get_version()
             })
         
         elif path in ['/discover', '/']:
             self._send_json(200, {
                 "service": "tide",
-                "version": "1.2"
+                "version": self._get_version()
             })
         
         else:
