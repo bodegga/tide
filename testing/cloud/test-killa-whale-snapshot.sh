@@ -59,13 +59,13 @@ hcloud network add-subnet "$NETWORK_ID" --network-zone us-west --type cloud --ip
 
 # Boot all 3 VMs from snapshots IN PARALLEL
 echo "  Booting pre-configured VMs..."
-hcloud server create --name "$GW_NAME" --type cx23 --image "$GOLDEN_GATEWAY_ID" --location hil \
+hcloud server create --name "$GW_NAME" --type cpx11 --image "$GOLDEN_GATEWAY_ID" --location hil \
     --ssh-key tide-testing --network "$NETWORK_ID" >/dev/null 2>&1 &
 
-hcloud server create --name "$TIDE_NAME" --type cx23 --image "$GOLDEN_TIDE_ID" --location hil \
+hcloud server create --name "$TIDE_NAME" --type cpx11 --image "$GOLDEN_TIDE_ID" --location hil \
     --ssh-key tide-testing --network "$NETWORK_ID" >/dev/null 2>&1 &
 
-hcloud server create --name "$VICTIM_NAME" --type cx23 --image "$GOLDEN_VICTIM_ID" --location hil \
+hcloud server create --name "$VICTIM_NAME" --type cpx11 --image "$GOLDEN_VICTIM_ID" --location hil \
     --ssh-key tide-testing --network "$NETWORK_ID" >/dev/null 2>&1 &
 
 wait

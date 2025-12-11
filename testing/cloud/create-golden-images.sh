@@ -150,25 +150,40 @@ EOF
 
 echo "  Creating 3 temporary VMs..."
 
-# Create VMs in parallel
-hcloud server create --name golden-gateway-temp --type cx23 --image ubuntu-22.04 --location hil \
-    --ssh-key tide-testing --user-data-from-file /tmp/gateway-golden.yaml >/dev/null 2>&1 &
+# Create VMs in parallel  
+hcloud server create --name golden-gateway-temp --type cpx11 --image ubuntu-22.04 --location hil \
+    --ssh-key tide-testing --user-data-from-file /tmp/gateway-golden.yaml &
+GW_PID=$!
 
-hcloud server create --name golden-tide-temp --type cx23 --image ubuntu-22.04 --location hil \
-    --ssh-key tide-testing --user-data-from-file /tmp/tide-golden.yaml >/dev/null 2>&1 &
+hcloud server create --name golden-tide-temp --type cpx11 --image ubuntu-22.04 --location hil \
+    --ssh-key tide-testing --user-data-from-file /tmp/tide-golden.yaml &
+TIDE_PID=$!
 
-hcloud server create --name golden-victim-temp --type cx23 --image ubuntu-22.04 --location hil \
-    --ssh-key tide-testing --user-data-from-file /tmp/victim-golden.yaml >/dev/null 2>&1 &
+hcloud server create --name golden-victim-temp --type cpx11 --image ubuntu-22.04 --location hil \
+    --ssh-key tide-testing --user-data-from-file /tmp/victim-golden.yaml &
+VICTIM_PID=$!
 
-wait
+# Wait for all creates to finish
+wait $GW_PID
+wait $TIDE_PID
+wait $VICTIM_PID
+
 rm -f /tmp/gateway-golden.yaml /tmp/tide-golden.yaml /tmp/victim-golden.yaml
 
 echo -e "${GREEN}✓ VMs created${NC}"
 
-# Get IPs
-GW_IP=$(hcloud server ip golden-gateway-temp)
-TIDE_IP=$(hcloud server ip golden-tide-temp)
-VICTIM_IP=$(hcloud server ip golden-victim-temp)
+# Get IPs (with retry in case servers are still initializing)
+sleep 3
+GW_IP=$(hcloud server ip golden-gateway-temp 2>/dev/null || echo "")
+TIDE_IP=$(hcloud server ip golden-tide-temp 2>/dev/null || echo "")
+VICTIM_IP=$(hcloud server ip golden-victim-temp 2>/dev/null || echo "")
+
+if [ -z "$GW_IP" ] || [ -z "$TIDE_IP" ] || [ -z "$VICTIM_IP" ]; then
+    echo -e "${RED}Error: Failed to get server IPs${NC}"
+    echo "Cleaning up..."
+    hcloud server delete golden-gateway-temp golden-tide-temp golden-victim-temp 2>/dev/null
+    exit 1
+fi
 
 echo ""
 echo -e "${CYAN}[2/6] Waiting for cloud-init to finish (this takes 2-3 minutes)...${NC}"
