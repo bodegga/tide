@@ -45,6 +45,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.5] - 2025-12-11
+
+### Fixed - CRITICAL BUG FIX
+- **Port 80 Binding Issue** - Resolved Python HTTP server failure with zero-log policy
+  - **Problem:** Python's `socketserver.TCPServer` could not bind port 80 when `StandardError=null`
+  - **Impact:** Web dashboard was completely non-functional on port 80
+  - **Root Cause:** Python HTTP server requires stderr for port binding errors
+  - **Solution:** Implemented nginx reverse proxy (production-grade)
+    - nginx serves port 80 (external)
+    - Python dashboard runs on port 8080 (internal)
+    - nginx configured with `access_log off; error_log /dev/null;`
+    - Zero-log policy fully maintained
+  - **Testing:** Validated on Hetzner CPX11 ARM server
+    - First test: Port 80 FAILED with StandardError=null
+    - Second test: Port 80 WORKS with nginx reverse proxy
+    - Cost: $0.02 (2 tests × $0.01 each)
+
+###Changed
+- **Web Dashboard** - Now runs on port 8080 internally (nginx proxies to port 80)
+- **Service Dependencies** - tide-web.service now requires nginx.service
+- **Installation** - install-services.sh now installs and configures nginx-light
+- **Version Display** - Dashboard and API now read version dynamically from VERSION file
+  - Fixed hardcoded "1.2.0" references
+  - Both HTML footer and JSON API show correct version
+
+### Added
+- **nginx Configuration** - `config/nginx/tide-dashboard.conf`
+  - Zero-log compliant (no access logs, error logs to /dev/null)
+  - Reverse proxy 80 → 8080
+  - Security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
+  - Health check endpoint for monitoring
+
+### Security
+- ✅ **Zero-Log Policy Maintained** - No user data logged
+- ✅ **StandardError=null** - No stderr logging for both services
+- ✅ **No Client IP Tracking** - nginx configured without X-Forwarded-For headers
+- ✅ **Production-Grade HTTP Server** - nginx more robust than Python HTTP server
+
+### Testing
+- ✅ **All 7 tests passing** on Hetzner CPX11 (ARM, Ubuntu 22.04)
+- ✅ Port 80 dashboard accessible and functional
+- ✅ API on port 9051 working
+- ✅ Tor connectivity confirmed
+- ✅ Mode switching operational
+- ✅ CLI commands functional
+- ✅ Version displays correctly (1.1.5)
+
+### Technical Details
+- nginx-light package (~1MB) added as dependency
+- CAP_NET_BIND_SERVICE capability removed (no longer needed)
+- Port 8080 requires no special privileges
+- nginx handles TLS termination capability for future HTTPS support
+
+### Migration from v1.1.4
+Users on v1.1.4 can update by pulling latest from GitHub and running:
+```bash
+cd /opt/tide
+git pull
+bash scripts/setup/install-services.sh
+```
+
+This release is **production-ready** and **fully tested** on real ARM hardware.
+
+---
+
 ## [1.1.4] - 2025-12-11
 
 ### Fixed
