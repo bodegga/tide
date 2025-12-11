@@ -43,18 +43,33 @@ pwd | grep -q "tide/testing" && echo "✅ In testing directory" || cd ~/Document
 
 ## Three Ways To Test
 
-### 🥇 Option 1: Docker Only (Fastest)
+### 🥇 Option 1: Hetzner Cloud (Recommended - Real Hardware)
 
-**Best for:** Daily development, quick validation  
-**Time:** 2-3 minutes  
-**Cost:** Free  
-**What it tests:** Proxy mode, Tor connectivity, API endpoints
+**Best for:** Production-realistic testing, pre-release validation  
+**Time:** 5 minutes  
+**Cost:** ~$0.01 USD (one penny)  
+**What it tests:** All modes, real ARM hardware, full network stack
+
+**Why Hetzner first:**
+- **Real ARM hardware** - Tests on actual ARM64 servers (matches Raspberry Pi)
+- **Full network stack** - Real iptables, routing, DNS (not containerized)
+- **Production conditions** - systemd, Tor daemon, actual OS environment
+- **Pennies per test** - ~$0.01 per test, ~$3/year for comprehensive testing
 
 ```bash
-# Start Docker Desktop first!
-cd ~/Documents/Personal-Projects/tide/testing/containers
-./test-docker.sh
+cd ~/Documents/Personal-Projects/tide/testing/cloud
+./test-hetzner.sh
 ```
+
+**What happens:**
+1. Creates ARM server in Hillsboro, OR (closest to Petaluma)
+2. Installs Tide Gateway v1.2.0
+3. Runs comprehensive 7-test suite
+4. Shows results
+5. Asks if you want to destroy or keep server
+6. Total cost: ~$0.01
+
+**⚠️ Important:** Always run Hetzner tests before releases. Docker is great for quick iterations, but Hetzner validates production reality.
 
 **Expected output:**
 ```
@@ -89,24 +104,20 @@ cd ~/Documents/Personal-Projects/tide/testing/containers
 
 ---
 
-### 🥈 Option 2: Hetzner Cloud (Production Realistic)
+### 🥈 Option 2: Docker Only (Quick Local Dev)
 
-**Best for:** Before releases, production validation  
-**Time:** 5 minutes  
-**Cost:** ~$0.01 USD (one penny)  
-**What it tests:** All modes, real ARM hardware, full network stack
+**Best for:** Quick local iterations during development  
+**Time:** 2-3 minutes  
+**Cost:** Free  
+**What it tests:** Proxy mode, Tor connectivity, API endpoints (containerized)
+
+**Note:** Docker is great for rapid development cycles, but doesn't test the full network stack or real ARM hardware. Use for quick iterations, but **always validate with Hetzner before releases**.
 
 ```bash
-cd ~/Documents/Personal-Projects/tide/testing/cloud
-./test-hetzner.sh
+# Start Docker Desktop first!
+cd ~/Documents/Personal-Projects/tide/testing/containers
+./test-docker.sh
 ```
-
-**What happens:**
-1. Creates ARM server in Hillsboro, OR (closest to Petaluma)
-2. Installs Tide Gateway v1.2.0
-3. Runs comprehensive test suite
-4. Asks if you want to destroy or keep server
-5. Total cost: ~$0.01
 
 **Expected output:**
 ```
@@ -164,10 +175,10 @@ Test complete!
 
 ### 🥇 Option 3: Full Orchestration (Both Platforms in Parallel)
 
-**Best for:** Comprehensive validation, CI/CD  
+**Best for:** Pre-release validation, comprehensive testing  
 **Time:** ~5 minutes (parallel, not 7-8 sequential!)  
 **Cost:** ~$0.01 USD  
-**What it tests:** Everything, simultaneously
+**What it tests:** Everything, simultaneously across real hardware + containers
 
 ```bash
 cd ~/Documents/Personal-Projects/tide/testing
@@ -383,9 +394,10 @@ Assuming 25 Hetzner tests per year:
 
 ### Regular (Ongoing)
 
-1. **Before every commit:** Quick Docker test
-2. **Before every release:** Full orchestrated test
-3. **Weekly cleanup:** `./orchestrate-tests.sh clean 10`
+1. **During development:** Quick Docker tests for iteration
+2. **Before every release:** Hetzner test (real hardware validation)
+3. **Pre-production:** Full orchestrated test (both platforms)
+4. **Weekly cleanup:** `./orchestrate-tests.sh clean 10`
 
 ### Future (Optional)
 
@@ -401,13 +413,13 @@ Assuming 25 Hetzner tests per year:
 # Most common commands
 cd ~/Documents/Personal-Projects/tide/testing
 
-# Quick test (2 min, free)
-./containers/test-docker.sh
-
-# Production test (5 min, $0.01)
+# 🥇 RECOMMENDED: Production test on real ARM hardware (5 min, $0.01)
 ./cloud/test-hetzner.sh
 
-# Full orchestration (5 min, $0.01)
+# Quick local dev iteration (2 min, free, containerized only)
+./containers/test-docker.sh
+
+# 🏆 BEST: Full orchestration - both platforms (5 min, $0.01)
 ./orchestrate-tests.sh
 
 # View results
@@ -418,13 +430,26 @@ cd ~/Documents/Personal-Projects/tide/testing
 ./orchestrate-tests.sh clean 10
 ```
 
+**⚠️ Testing Priority:**
+1. **Before releases:** Always run Hetzner (real hardware validation)
+2. **During development:** Docker for quick iterations
+3. **Pre-production:** Full orchestration (both platforms)
+
 ---
 
 ## Ready to Test?
 
 **Choose your first test:**
 
-### Option A: Docker (Safe, Free)
+### 🥇 Option A: Hetzner (RECOMMENDED - Real Hardware)
+**Why first:** Tests on real ARM hardware, validates production reality, costs a penny
+```bash
+cd ~/Documents/Personal-Projects/tide/testing/cloud
+./test-hetzner.sh
+```
+
+### Option B: Docker (Quick & Free)
+**Use for:** Rapid development iterations (but remember: always validate with Hetzner before releases!)
 ```bash
 # 1. Start Docker Desktop
 open -a Docker
@@ -434,13 +459,8 @@ cd ~/Documents/Personal-Projects/tide/testing/containers
 ./test-docker.sh
 ```
 
-### Option B: Hetzner (Real Hardware, Costs a Penny)
-```bash
-cd ~/Documents/Personal-Projects/tide/testing/cloud
-./test-hetzner.sh
-```
-
-### Option C: Full Orchestration (Both)
+### 🏆 Option C: Full Orchestration (Both Platforms - BEST)
+**The gold standard:** Tests both platforms in parallel
 ```bash
 # Start Docker Desktop first!
 cd ~/Documents/Personal-Projects/tide/testing
@@ -452,6 +472,7 @@ cd ~/Documents/Personal-Projects/tide/testing
 **You're all set! Your testing infrastructure is ready to go.** 🌊
 
 **Questions?** Check:
+- `../docs/HETZNER-PLATFORM.md` - **PRIMARY platform documentation**
 - `ORCHESTRATION-README.md` - Quick reference
 - `ORCHESTRATION.md` - Full documentation
 - `PLATFORM-COMPARISON.md` - Platform pros/cons
