@@ -1,0 +1,100 @@
+# Tide Gateway - Complete Test Suite
+# Tests all Docker modes: Proxy, Router
+# Note: Killa Whale mode not supported (requires kernel ARP access)
+
+services:
+  # Test 1: Proxy Mode (SOCKS5 only)
+  tide-proxy:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.gateway
+    container_name: tide-test-proxy
+    hostname: tide-proxy
+    restart: "no"
+    environment:
+      - TIDE_MODE=proxy
+      - TIDE_SECURITY=standard
+    ports:
+      - "9050:9050"  # SOCKS5
+      - "9051:9051"  # API
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test 2: Router Mode (Transparent proxy + DHCP)
+  tide-router:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.gateway
+    container_name: tide-test-router
+    hostname: tide-router
+    restart: "no"
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+    environment:
+      - TIDE_MODE=router
+      - TIDE_SECURITY=standard
+      - TIDE_GATEWAY_IP=10.101.101.10
+      - TIDE_SUBNET=10.101.101.0/24
+      - TIDE_DHCP_START=10.101.101.100
+      - TIDE_DHCP_END=10.101.101.200
+    networks:
+      tide-test-net:
+        ipv4_address: 10.101.101.10
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test 3: Hardened Mode (Bridges + restrictive torrc)
+  tide-hardened:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.gateway
+    container_name: tide-test-hardened
+    hostname: tide-hardened
+    restart: "no"
+    environment:
+      - TIDE_MODE=proxy
+      - TIDE_SECURITY=hardened
+    ports:
+      - "9052:9050"  # SOCKS5 (different port to avoid conflict)
+      - "9053:9051"  # API
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test 4: Paranoid Mode (Maximum isolation)
+  tide-paranoid:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.gateway
+    container_name: tide-test-paranoid
+    hostname: tide-paranoid
+    restart: "no"
+    environment:
+      - TIDE_MODE=proxy
+      - TIDE_SECURITY=paranoid
+    ports:
+      - "9054:9050"  # SOCKS5
+      - "9055:9051"  # API
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  tide-test-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.101.101.0/24
+          gateway: 10.101.101.1
