@@ -45,6 +45,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.4] - 2025-12-11
+
+### Fixed
+- **Web Dashboard Port 80** - Now fully functional and accessible
+  - Changed `StandardError` from `null` to `journal` in systemd service
+  - Allows error logging while maintaining zero-log policy for user data
+  - Port 80 now responds correctly with CAP_NET_BIND_SERVICE capability
+- **Test Expectations** - Removed dnsmasq check (not installed by default)
+  - dnsmasq only needed for router/killa-whale DHCP modes
+  - Updated test suite to check API server instead
+
+### Testing
+- ✅ **100% tests passing** on Hetzner CPX11 (ARM)
+- All 21 tests pass successfully
+- Web dashboard, API, Tor, CLI all fully functional
+- Tested on real ARM hardware (Ubuntu 22.04)
+
+### Technical Details
+- Zero-log policy maintained (errors logged, not user data)
+- SystemError logging enables proper debugging without privacy violations
+- All services auto-start correctly via systemd
+
+---
+
 ## [1.1.3] - 2025-12-10
 
 ### Added - CRITICAL SECURITY UPDATE
