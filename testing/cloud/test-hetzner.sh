@@ -176,7 +176,8 @@ echo ""
 echo "✓ TEST 3: Services Running"
 pgrep -x tor >/dev/null && echo "  ✓ Tor running" || echo "  ✗ Tor not running"
 pgrep -f tide-web-dashboard >/dev/null && echo "  ✓ Web dashboard running" || echo "  ✗ Web dashboard not running"
-pgrep -x dnsmasq >/dev/null && echo "  ✓ dnsmasq running" || echo "  ✗ dnsmasq not running"
+pgrep -f tide-api >/dev/null && echo "  ✓ API server running" || echo "  ✗ API server not running"
+# Note: dnsmasq only needed for router/killa-whale DHCP modes (not installed by default)
 echo ""
 
 # Test 4: Web dashboard accessible
