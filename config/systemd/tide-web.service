@@ -12,9 +12,9 @@ ExecStart=/usr/bin/python3 /opt/tide/scripts/runtime/tide-web-dashboard.py
 Restart=always
 RestartSec=10
 # ZERO-LOG POLICY: No logging for privacy (Tide is a privacy appliance)
-# Note: Errors still logged to journal for debugging, but no user data
+# ABSOLUTELY NO LOGS - not even errors (privacy over debugging)
 StandardOutput=null
-StandardError=journal
+StandardError=null
 
 # Security settings
 NoNewPrivileges=true
