@@ -101,52 +101,72 @@ hcloud network add-subnet "$NETWORK_ID" \
 echo -e "${GREEN}✓ Private network: 192.168.100.0/24${NC}"
 echo ""
 
-echo -e "${CYAN}[3/12] Creating REAL GATEWAY (legitimate router)...${NC}"
+echo -e "${CYAN}[3/12] Creating all 3 servers IN PARALLEL (faster)...${NC}"
+echo "  Launching gateway, tide, and victim simultaneously..."
+
+# Create all 3 servers in parallel (background processes)
 hcloud server create \
     --name "$GATEWAY_NAME" \
     --type "$SERVER_TYPE" \
     --image "$IMAGE" \
     --location "$LOCATION" \
     --ssh-key "$SSH_KEY_NAME" \
-    --network "$NETWORK_ID"
+    --network "$NETWORK_ID" &
+GW_PID=$!
 
-GATEWAY_IP=$(hcloud server ip "$GATEWAY_NAME")
-echo -e "${GREEN}✓ Real Gateway: $GATEWAY_IP${NC}"
-echo ""
-
-echo -e "${CYAN}[4/12] Creating TIDE GATEWAY (attacker with killa-whale)...${NC}"
 hcloud server create \
     --name "$TIDE_NAME" \
     --type "$SERVER_TYPE" \
     --image "$IMAGE" \
     --location "$LOCATION" \
     --ssh-key "$SSH_KEY_NAME" \
-    --network "$NETWORK_ID"
+    --network "$NETWORK_ID" &
+TIDE_PID=$!
 
-TIDE_IP=$(hcloud server ip "$TIDE_NAME")
-echo -e "${GREEN}✓ Tide Gateway: $TIDE_IP${NC}"
-echo ""
-
-echo -e "${CYAN}[5/12] Creating VICTIM DEVICE (innocent client)...${NC}"
 hcloud server create \
     --name "$VICTIM_NAME" \
     --type "$SERVER_TYPE" \
     --image "$IMAGE" \
     --location "$LOCATION" \
     --ssh-key "$SSH_KEY_NAME" \
-    --network "$NETWORK_ID"
+    --network "$NETWORK_ID" &
+VICTIM_PID=$!
 
+# Wait for all 3 to complete
+echo "  Waiting for all servers to deploy..."
+wait $GW_PID
+echo "  ✓ Real Gateway created"
+wait $TIDE_PID
+echo "  ✓ Tide Gateway created"
+wait $VICTIM_PID
+echo "  ✓ Victim Device created"
+
+# Get IPs
+GATEWAY_IP=$(hcloud server ip "$GATEWAY_NAME")
+TIDE_IP=$(hcloud server ip "$TIDE_NAME")
 VICTIM_IP=$(hcloud server ip "$VICTIM_NAME")
-echo -e "${GREEN}✓ Victim Device: $VICTIM_IP${NC}"
+
+echo ""
+echo -e "${GREEN}✓ All 3 servers deployed in parallel${NC}"
+echo "  Real Gateway: $GATEWAY_IP"
+echo "  Tide Gateway: $TIDE_IP"
+echo "  Victim Device: $VICTIM_IP"
 echo ""
 
-echo -e "${CYAN}[6/12] Waiting for SSH (60 seconds)...${NC}"
-sleep 60
-echo -e "${GREEN}✓ Servers ready${NC}"
+echo -e "${CYAN}[4/12] Waiting for SSH (checking every 2 seconds)...${NC}"
+for i in {1..30}; do
+    if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@"$GATEWAY_IP" "echo ready" >/dev/null 2>&1 && \
+       ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@"$TIDE_IP" "echo ready" >/dev/null 2>&1 && \
+       ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@"$VICTIM_IP" "echo ready" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ All servers ready (took $((i*2)) seconds)${NC}"
+        break
+    fi
+    sleep 2
+done
 echo ""
 
 # Get private network interface name
-echo -e "${CYAN}[7/12] Detecting network interfaces...${NC}"
+echo -e "${CYAN}[5/12] Detecting network interfaces...${NC}"
 PRIVATE_IFACE=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@"$GATEWAY_IP" "ip -br addr | grep 192.168.100 | awk '{print \$1}'" || echo "enp7s0")
 echo "  Private network interface: $PRIVATE_IFACE"
 
@@ -160,7 +180,7 @@ echo "  Tide Gateway: $TIDE_PRIVATE"
 echo "  Victim Device: $VICTIM_PRIVATE"
 echo ""
 
-echo -e "${CYAN}[8/12] Configuring REAL GATEWAY (internet router)...${NC}"
+echo -e "${CYAN}[6/12] Configuring REAL GATEWAY (internet router)...${NC}"
 ssh -o StrictHostKeyChecking=no root@"$GATEWAY_IP" bash << EOFGATEWAY
 set -e
 apt-get update -qq
@@ -196,7 +216,7 @@ EOFGATEWAY
 echo -e "${GREEN}✓ Real gateway is now routing internet traffic${NC}"
 echo ""
 
-echo -e "${CYAN}[9/12] Installing Tide Gateway (killa-whale mode)...${NC}"
+echo -e "${CYAN}[7/12] Installing Tide Gateway (killa-whale mode)...${NC}"
 ssh -o StrictHostKeyChecking=no root@"$TIDE_IP" bash << EOFTIDE
 set -e
 apt-get update -qq
@@ -236,25 +256,33 @@ EOFTIDE
 echo -e "${GREEN}✓ Tide Gateway ready${NC}"
 echo ""
 
-echo -e "${CYAN}[10/12] Configuring VICTIM DEVICE...${NC}"
+echo -e "${CYAN}[8/12] Configuring VICTIM DEVICE...${NC}"
 ssh -o StrictHostKeyChecking=no root@"$VICTIM_IP" bash << EOFVICTIM
 set -e
 
-# Install packages FIRST (before routing changes)
-apt-get update -qq
-apt-get install -y curl tcpdump net-tools traceroute >/dev/null 2>&1
+# Configure DNS FIRST
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
-# THEN modify routing
+# Configure routing to use REAL gateway
 ip route del default || true
 ip route add default via $GATEWAY_PRIVATE
+
+# Test connectivity
+echo "Testing connectivity to real gateway..."
+ping -c 2 $GATEWAY_PRIVATE
+
+echo "Testing internet connectivity..."
+ping -c 2 8.8.8.8
+
+echo "✓ Victim has internet access through real gateway"
 
 echo "✓ Victim configured to use REAL gateway ($GATEWAY_PRIVATE)"
 echo ""
 echo "Before attack - victim's view:"
-route -n
+ip route show
 echo ""
 echo "ARP table before attack:"
-arp -a
+ip neigh show
 EOFVICTIM
 
 echo -e "${GREEN}✓ Victim is using REAL gateway${NC}"
@@ -270,7 +298,7 @@ echo "  Tide Gateway MAC: $TIDE_MAC"
 echo "  Victim should see Real Gateway MAC for $GATEWAY_PRIVATE"
 echo ""
 
-echo -e "${CYAN}[11/12] ACTIVATING KILLA-WHALE MODE (ARP POISONING ATTACK)...${NC}"
+echo -e "${CYAN}[9/12] ACTIVATING KILLA-WHALE MODE (ARP POISONING ATTACK)...${NC}"
 echo ""
 echo "🐋 ATTACKING NETWORK..."
 echo "  Target: Victim device at $VICTIM_PRIVATE"
@@ -329,7 +357,7 @@ EOFKW
 echo -e "${GREEN}✓ Killa-Whale attack in progress${NC}"
 echo ""
 
-echo -e "${CYAN}[12/12] VALIDATION TESTS (from victim's perspective)...${NC}"
+echo -e "${CYAN}[10/10] VALIDATION TESTS (from victim's perspective)...${NC}"
 echo ""
 
 ssh -o StrictHostKeyChecking=no root@"$VICTIM_IP" bash << EOFTEST
@@ -343,10 +371,10 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "Checking if victim's ARP cache has been poisoned..."
 echo ""
 echo "ARP table NOW (after attack):"
-arp -a
+ip neigh show
 echo ""
 
-GATEWAY_MAC_NOW=\$(arp -n | grep "$GATEWAY_PRIVATE" | awk '{print \$3}')
+GATEWAY_MAC_NOW=\$(ip neigh show "$GATEWAY_PRIVATE" | awk '{print \$5}')
 echo "Gateway ($GATEWAY_PRIVATE) MAC address in ARP table: \$GATEWAY_MAC_NOW"
 echo "Tide Gateway actual MAC: $TIDE_MAC"
 echo "Real Gateway actual MAC: $GATEWAY_MAC"
@@ -385,24 +413,26 @@ echo ""
 echo "TEST 3: Routing Table Check"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Current routing table:"
-route -n
+ip route show
 echo ""
 
-echo "TEST 4: First Hop Trace"
+echo "TEST 4: First Hop Check (using ping)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Checking if first hop goes through Tide..."
-FIRST_HOP=\$(timeout 10 traceroute -m 2 -n 8.8.8.8 2>&1 | grep "^ 1" | awk '{print \$2}')
-echo "First hop: \$FIRST_HOP"
+echo "Checking ARP table to see which MAC we're using..."
+FIRST_HOP_MAC=\$(ip neigh show | grep "^$GATEWAY_PRIVATE" | awk '{print \$5}')
+echo "First hop MAC for $GATEWAY_PRIVATE: \$FIRST_HOP_MAC"
+echo "Tide MAC: $TIDE_MAC"
+echo "Real Gateway MAC: $GATEWAY_MAC"
 echo ""
 
-if [ "\$FIRST_HOP" = "$TIDE_PRIVATE" ]; then
-    echo "✅ SUCCESS: First hop is Tide Gateway"
+if [ "\$FIRST_HOP_MAC" = "$TIDE_MAC" ]; then
+    echo "✅ SUCCESS: First hop MAC is Tide Gateway"
     echo "   Traffic is being intercepted"
-elif [ "\$FIRST_HOP" = "$GATEWAY_PRIVATE" ]; then
-    echo "❌ FAIL: First hop is still real gateway"
+elif [ "\$FIRST_HOP_MAC" = "$GATEWAY_MAC" ]; then
+    echo "❌ FAIL: First hop MAC is still real gateway"
     echo "   ARP poisoning didn't work"
 else
-    echo "⚠️  UNKNOWN: First hop is \$FIRST_HOP"
+    echo "⚠️  UNKNOWN: First hop MAC is \$FIRST_HOP_MAC"
 fi
 echo ""
 
