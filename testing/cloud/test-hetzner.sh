@@ -113,6 +113,7 @@ cd tide
 mkdir -p /opt/tide
 cp -r scripts /opt/tide/
 cp -r config /opt/tide/
+cp VERSION /opt/tide/
 
 # Install CLI tools in PATH
 cp scripts/runtime/tide-cli.sh /usr/local/bin/
