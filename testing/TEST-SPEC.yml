@@ -2,7 +2,7 @@
 # This file defines what SHOULD be tested across all platforms
 # Update this when you add/remove features
 
-version: "1.1.1"
+version: "1.2.0"
 last_updated: "2024-12-10"
 
 # Core Features (MUST test on all platforms)
@@ -44,7 +44,7 @@ core_features:
       - "tide mode killa-whale"
 
 # Future v1.2.0 Features (in development, not released yet)
-future_v1_2_features:
+v1_2_features:
   - name: "Web Dashboard"
     description: "Dashboard accessible on port 80"
     platforms: ["hetzner", "qemu", "virtualbox"]

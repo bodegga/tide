@@ -12,7 +12,7 @@ CYAN='\033[0;36m'
 PURPLE='\033[0;35m'
 NC='\033[0m'
 
-TIDE_VERSION="1.1.1"
+TIDE_VERSION="1.2.0"
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$TEST_DIR/../.." && pwd)"
 VM_NAME="tide-test-$(date +%s)"
