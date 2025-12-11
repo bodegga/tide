@@ -1,156 +1,115 @@
-# Tide Security Documentation
+# Security Policy
 
-## API Authentication (Port 9051)
+## Supported Versions
 
-### Overview
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.x     | ✅ Active support  |
+| < 1.0   | ❌ No longer supported |
 
-The Tide API server provides both **read-only** and **write** operations. As of v1.2, write operations require Bearer token authentication to prevent unauthorized circuit manipulation.
+## Reporting a Vulnerability
 
-### Endpoints
+**Please DO NOT open public issues for security vulnerabilities.**
 
-#### Public (No Authentication Required)
+### How to Report
 
-- `GET /status` - Gateway status information
-- `GET /circuit` - Current Tor exit IP
-- `GET /check` - Verify Tor connectivity
-- `GET /discover` - Service discovery
-- `GET /token` - Retrieve API token
+Send security reports to: **a@biasi.co**
 
-#### Protected (Bearer Token Required)
+Include:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix (if any)
 
-- `GET /newcircuit` - Request new Tor circuit
+### What to Expect
 
-### How It Works
+- **Acknowledgment:** Within 48 hours
+- **Investigation:** Within 7 days
+- **Fix & Disclosure:** Coordinated timeline (typically 30-90 days)
 
-1. **Token Generation**
-   - On first startup, the gateway generates a secure random token (43 characters)
-   - Token is saved to `/etc/tide/api_token` with 0600 permissions
-   - Token persists across restarts
+We'll work with you to understand the issue and develop a fix before public disclosure.
 
-2. **Token Retrieval**
-   - Clients fetch token from `GET /token` endpoint
-   - Alternatively, set `TIDE_API_TOKEN` environment variable
+## Security Model
 
-3. **Making Authenticated Requests**
-   ```bash
-   # Get token
-   TOKEN=$(curl -s http://10.101.101.10:9051/token | jq -r .token)
-   
-   # Use token
-   curl -H "Authorization: Bearer $TOKEN" \
-        http://10.101.101.10:9051/newcircuit
-   ```
+Tide's security guarantees:
 
-### Threat Model
+### ✅ What We Protect Against
+- **Traffic leaks** - All traffic routed through Tor or blocked
+- **DNS leaks** - DNS queries go through Tor DNSPort
+- **IPv6 leaks** - IPv6 disabled entirely
+- **Clearnet fallback** - Gateway itself cannot reach clearnet
+- **Tor failures** - If Tor dies, traffic is blocked (fail-closed)
 
-#### Assumptions
+### ⚠️ What We Don't Protect Against
+- **Local network attacks** - Tide doesn't encrypt local traffic
+- **Browser fingerprinting** - Use Tor Browser for anonymity
+- **Malware on client** - Tide is a network gateway, not endpoint security
+- **Physical access** - Assume attacker with VM/host access can see traffic
+- **Zero-day exploits** - We use Tor/Alpine/iptables; vulnerabilities there affect Tide
 
-- **Trusted Network**: Clients are on a trusted Docker/VM network
-- **No Public Exposure**: API port 9051 is NOT exposed to the internet
-- **Physical Security**: Host machine is physically secure
+### 🔒 Security Features
 
-#### Risks Mitigated
+1. **Immutable Config** - Critical files locked with `chattr +i`
+2. **Fail-Closed Firewall** - Default DROP policy on OUTPUT
+3. **No IPv6** - Completely disabled to prevent leaks
+4. **Minimal Attack Surface** - Alpine Linux, minimal packages
+5. **No Logging** - Tor doesn't log, gateway doesn't log
 
-✅ **Unauthorized Circuit Manipulation**
-- Attackers on the network cannot force circuit changes
-- Prevents DoS via circuit spam
-- Reduces correlation attack surface
+## Known Limitations
 
-✅ **Rate Limiting** (Future)
-- Token enables per-client rate limiting
-- Can revoke/rotate tokens if abused
+### Docker Mode
+- Docker's NAT can be bypassed if container has `CAP_NET_ADMIN` + bad config
+- Host network mode (`--network host`) defeats isolation
+- Container escape vulnerabilities affect Tide's isolation
 
-#### Remaining Risks
+### VM Mode
+- Hypervisor bugs could leak traffic
+- Shared clipboard/drag-drop can leak data
+- VM snapshots may contain sensitive state
 
-⚠️ **Information Disclosure**
-- `/status` and `/circuit` still expose operational info
-- Anyone on network can see Tor exit IPs
-- **Mitigation**: Keep gateway on isolated network segment
+### Takeover Mode (Planned)
+- ARP hijacking is detectable on the local network
+- Could be disrupted by legitimate ARP traffic
+- Requires physical network access to deploy
 
-⚠️ **Token Exposure**
-- Token is transmitted in plaintext HTTP
-- Anyone sniffing the network can capture tokens
-- **Mitigation**: Use for lab/testing only, or add TLS for production
+## Best Practices
 
-⚠️ **No Rate Limiting**
-- Authenticated clients can still spam `/newcircuit`
-- **Future Enhancement**: Add rate limiting per token
+### For Users
+1. **Verify no leaks:** Test with `curl --socks5 10.101.101.10:9050 https://check.torproject.org/api/ip`
+2. **Use Tor Browser:** For anonymity, not just privacy
+3. **Isolate sensitive VMs:** Don't mix clearnet and Tide on same host
+4. **Keep updated:** Run `docker pull bodegga/tide:latest` regularly
 
-### Deployment Modes
+### For Developers
+1. **Never log traffic:** No packet captures, connection logs, etc.
+2. **Fail closed:** If in doubt, block traffic
+3. **Audit iptables rules:** Ensure no clearnet bypass
+4. **Test leak scenarios:** Tor stopped, network down, etc.
 
-#### Lab/Testing (Current)
-```bash
-# No special configuration needed
-docker-compose up -d
-```
+## Responsible Disclosure
 
-#### Production (Recommended)
-```bash
-# Set custom token
-export TIDE_API_TOKEN="your-custom-secure-token-here"
-docker-compose up -d
+We follow coordinated vulnerability disclosure:
+1. Reporter privately notifies us
+2. We confirm and develop a fix
+3. We release the fix
+4. Public disclosure after fix is available
 
-# Or use .env file
-echo "TIDE_API_TOKEN=your-token" >> .env
-```
+**Timeline:** Typically 30-90 days, negotiable based on severity.
 
-#### High Security
-```bash
-# Disable token endpoint (manual token distribution)
-# Remove /token endpoint from API server
-# Clients must set TIDE_API_TOKEN environment variable
-```
+## Security Updates
 
-### Best Practices
+Critical security updates will be:
+- Released immediately
+- Announced in GitHub Releases
+- Noted in CHANGELOG.md
+- Tagged with `[SECURITY]` prefix
 
-1. **Never expose port 9051 to the internet**
-   ```bash
-   # BAD - exposes API publicly
-   docker run -p 9051:9051 tide-gateway
-   
-   # GOOD - internal network only
-   docker run --network tide_tidenet tide-gateway
-   ```
+## Questions?
 
-2. **Rotate tokens periodically**
-   ```bash
-   # Generate new token
-   docker exec tide-gateway sh -c 'python3 -c "import secrets; print(secrets.token_urlsafe(32))" > /etc/tide/api_token'
-   docker restart tide-gateway
-   ```
+For non-sensitive security questions, open a GitHub Discussion.
 
-3. **Use environment variables for tokens**
-   ```bash
-   # Client machines
-   export TIDE_API_TOKEN="token-from-gateway"
-   ```
-
-4. **Monitor API access**
-   ```bash
-   # Check gateway logs for unauthorized attempts
-   docker logs tide-gateway | grep "unauthorized"
-   ```
-
-### Future Enhancements
-
-- [ ] TLS/HTTPS support for encrypted token transmission
-- [ ] Per-client token generation with revocation
-- [ ] Rate limiting on authenticated endpoints
-- [ ] Audit logging of circuit changes
-- [ ] Optional IP-based ACLs
-- [ ] mTLS for client authentication
-
-### Security Audit
-
-Last reviewed: 2025-12-09  
-Reviewer: OpenCode AI Agent  
-Risk Level: **MEDIUM** (acceptable for lab/testing, requires hardening for production)
-
-### Reporting Vulnerabilities
-
-For security issues, please open a GitHub issue or contact the maintainers directly.
+For vulnerabilities, email **a@biasi.co**.
 
 ---
 
-**Tide Project**: https://github.com/bodegga/tide  
-**License**: MIT
+**Thank you for helping keep Tide secure!** 🔒

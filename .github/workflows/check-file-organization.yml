@@ -1,0 +1,56 @@
+name: Check File Organization
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  check-organization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check for files in root
+        run: |
+          # Allowed files in root
+          ALLOWED="README.md START-HERE.md LICENSE VERSION .gitignore tide-install.sh .git .github alpine-virt-3.21.0-aarch64.iso alpine-standard-3.21.0-aarch64.iso README-icon.png"
+          
+          # Get all files in root (not directories)
+          ROOT_FILES=$(ls -1 | grep -v "^\.git" || true)
+          
+          # Check each file
+          VIOLATIONS=0
+          for file in $ROOT_FILES; do
+            # Skip if it's a directory
+            if [ -d "$file" ]; then
+              continue
+            fi
+            
+            # Check if allowed
+            if ! echo "$ALLOWED" | grep -q "\b$file\b"; then
+              echo "❌ File in root should be moved: $file"
+              VIOLATIONS=$((VIOLATIONS + 1))
+            fi
+          done
+          
+          # Report results
+          if [ $VIOLATIONS -gt 0 ]; then
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "⚠️  Found $VIOLATIONS file(s) in root that should be moved!"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            echo "File organization rules:"
+            echo "  Documentation → docs/"
+            echo "  Deployment scripts → deployment/<platform>/"
+            echo "  Testing scripts → testing/"
+            echo "  Build scripts → scripts/build/"
+            echo "  Runtime scripts → scripts/runtime/"
+            echo "  Config files → config/"
+            echo ""
+            exit 1
+          else
+            echo "✅ All files properly organized!"
+          fi

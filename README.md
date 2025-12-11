@@ -1,265 +1,181 @@
-<div align="center">
-
-<img src="README-icon.png" width="200" alt="Tide Icon" />
-
-# 🌊 TIDE
+# 🌊 Tide Gateway
 
 **Transparent Internet Defense Engine**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-Docker%20%7C%20VM%20%7C%20Bare--metal-lightgrey)](https://github.com/bodegga/tide)
-[![Version](https://img.shields.io/badge/version-1.2.0-green)](https://github.com/bodegga/tide/releases)
-[![Tor](https://img.shields.io/badge/Tor-enabled-purple)](https://www.torproject.org/)
+> A hardened, leak-proof Tor gateway with web-based management and multiple deployment modes.
 
-*freedom within the shell* • [bodegga.net](https://bodegga.net)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.2.0-green)](docs/CHANGELOG.md)
+[![Platform](https://img.shields.io/badge/platform-Docker%20%7C%20VM%20%7C%20Bare--metal-lightgrey)](docs/ROADMAP.md)
 
-</div>
+---
 
-**Route through Tor or nothing.** A hardened, leak-proof Tor gateway with multiple deployment modes.
+## Quick Start
 
-## Platform Support
+### Web Dashboard (NEW in v1.2.0!)
+```bash
+# Access from any client device:
+http://tide.bodegga.net
+```
 
-Tide runs on **any platform** that supports Docker or VMs:
-- ✅ **Docker** - Linux, macOS (Intel/Apple Silicon), Windows (WSL2)
-- ✅ **VMs** - UTM, QEMU, VirtualBox, VMware, Parallels, Hyper-V
-- ✅ **Bare-metal** - Any Alpine Linux compatible hardware (x86_64, ARM64)
+### One-Command Deployment
+```bash
+# Hetzner Cloud (automated testing):
+./deployment/hetzner/test-on-hetzner.sh
 
-Client devices can be **anything** with network access.
+# Parallels Desktop (macOS):
+./deployment/parallels/ONE-COMMAND-DEPLOY.sh
+```
 
-## Features
+### Features
+- 🌐 **Web Dashboard** - Monitor status at http://tide.bodegga.net
+- 🔧 **Mode Switching** - Change modes without redeploy (`tide mode killa-whale`)
+- 🔒 **Fail-Closed Security** - If Tor dies, traffic is blocked
+- 🐋 **Killa Whale Mode** - Aggressive network takeover with ARP poisoning
+- 📱 **CLI Management** - `tide status`, `tide config`, `tide clients`
 
-- **Fail-Closed Security** - If Tor dies, traffic is blocked (not leaked)
-- **Immutable Config** - Critical files locked with `chattr +i`
-- **Multiple Modes** - From simple proxy to full subnet takeover
-- **Zero Config Clients** - DHCP + DNS handles everything
-- **Platform Agnostic** - Runs anywhere Docker or VMs do
+---
+
+## Documentation
+
+### Getting Started
+- **[Quick Start Guide](docs/guides/QUICK-START.md)** - 5-minute setup
+- **[Web Dashboard](docs/guides/WEB-DASHBOARD-README.md)** - Dashboard features and API
+- **[Fresh Installation](docs/guides/FRESH-INSTALL-GUIDE.md)** - Manual installation walkthrough
+
+### Deployment Guides
+- **[Hetzner Cloud](deployment/hetzner/)** - Automated cloud testing (~$0.003/test)
+- **[Parallels Desktop](deployment/parallels/)** - macOS VM deployment
+- **[QEMU/KVM](deployment/qemu/)** - Linux VM deployment
+
+### Reference
+- **[Changelog](docs/CHANGELOG.md)** - Version history
+- **[Roadmap](docs/ROADMAP.md)** - Planned features
+- **[Security](docs/SECURITY.md)** - Security model and guarantees
+- **[Contributing](docs/CONTRIBUTING.md)** - How to contribute
+
+---
 
 ## Deployment Modes
 
 | Mode | Description | Use Case |
 |------|-------------|----------|
-| **Proxy** | SOCKS5 + DNS only | Single VM, testing |
-| **Router** | DHCP + DNS + transparent proxy | VM lab, isolated network |
+| **Proxy** | SOCKS5 only | Single VM, testing |
+| **Router** | DHCP + transparent proxy | VM lab, isolated network |
 | **Killa Whale** | Router + fail-closed firewall | High security |
 | **Takeover** | Killa Whale + ARP hijacking | Full subnet control |
 
 ## Security Profiles
 
-| Profile | Description | Trade-off |
-|---------|-------------|-----------|
-| **Standard** | Default Tor settings | Fastest, most relays |
-| **Hardened** | Excludes 14-eyes countries | Fewer exits, more privacy |
-| **Paranoid** | Max isolation, hostile countries blocked | Slowest, maximum anonymity |
-| **Bridges** | Uses obfs4 bridges | Anti-censorship, bypasses blocks |
+| Profile | Description | Speed |
+|---------|-------------|-------|
+| **Standard** | Default Tor settings | Fastest |
+| **Hardened** | Excludes 14-eyes countries | Moderate |
+| **Paranoid** | Maximum isolation | Slowest |
+| **Bridges** | Uses obfs4 bridges | Anti-censorship |
 
-## Quick Start
-
-### Docker (Proxy Only)
-```bash
-docker run -d --name tide -p 9050:9050 -p 5353:5353/udp bodegga/tide
-# Configure apps: SOCKS5=localhost:9050, DNS=localhost:5353
-```
-
-### VM Gateway (Full Features)
-```bash
-# Boot Alpine Linux ISO, login as root, run:
-wget -qO- https://raw.githubusercontent.com/bodegga/tide/main/tide-install.sh | sh
-
-# Select your mode (1-4), follow prompts
-```
-
-### UTM / QEMU
-Download from [Releases](https://github.com/bodegga/tide/releases):
-1. Import `tide-gateway.qcow2` + attach `cloud-init.iso`
-2. Add 2 NICs (Shared + Host-Only)
-3. Boot → auto-configures
-
-## Client Configuration
-
-**For Router/Killa Whale/Takeover modes:** Clients just connect - DHCP handles everything.
-
-**For Proxy mode:** Configure apps manually:
-- SOCKS5: `10.101.101.10:9050`
-- DNS: `10.101.101.10:5353`
-
-**Verify:** `curl --socks5 10.101.101.10:9050 https://check.torproject.org/api/ip`
-
-## Security Model
-
-```
-                    ┌─────────────────┐
-   Clients ────────▶│  TIDE GATEWAY   │────▶ Tor Network ────▶ Internet
-   (auto DHCP)      │                 │
-                    │ • iptables DROP │
-                    │ • Only Tor out  │
-                    │ • Fail-closed   │
-                    └─────────────────┘
-                           │
-                    Clearnet blocked ❌
-```
-
-**Guarantees:**
-- All TCP redirected through Tor TransPort
-- All DNS through Tor DNSPort  
-- No UDP except DNS (dropped)
-- No ICMP to outside (dropped)
-- No IPv6 (disabled)
-- Gateway itself cannot reach clearnet (only Tor process can)
-
-## Web Dashboard
-
-**NEW in v1.2.0:** Web-based status dashboard accessible from any client device!
-
-```bash
-# Open browser on any connected client:
-http://tide.bodegga.net
-```
-
-**Features:**
-- 🟢 Real-time Tor connection status
-- 📊 Mode, security profile, uptime
-- 🌍 Current Tor exit IP and country
-- 📱 Connected DHCP clients
-- 🔥 ARP poisoning status (Killa Whale mode)
-- 📡 Network health monitoring
-- ⚡ Auto-refresh every 30 seconds
-
-**How it works:**
-- Tide **hijacks DNS** for `tide.bodegga.net` → always resolves to `10.101.101.10`
-- Works like commercial routers (Ubiquiti: `unifi.ui.com`, Netgear: `routerlogin.net`)
-- **Killa Whale mode:** iptables enforces DNS hijacking - NO ESCAPE 🐋
-
-See [WEB-DASHBOARD-README.md](WEB-DASHBOARD-README.md) for full documentation.
+---
 
 ## CLI Commands
 
 ```bash
-tide status      # Show full gateway status with colors
-tide check       # Test Tor connectivity
-tide circuit     # Show current Tor exit IP
-tide newcircuit  # Request new Tor circuit
-tide web         # Show dashboard URL
-tide clients     # List connected DHCP clients
-tide arp         # Show ARP poisoning status
-tide logs        # View Tor logs
-tide help        # Show help message
+tide status        # Show gateway status
+tide config        # Interactive configuration
+tide mode <mode>   # Switch deployment mode
+tide security <p>  # Switch security profile
+tide clients       # List connected clients
+tide check         # Test Tor connectivity
+tide web           # Show dashboard URL
 ```
 
-## Client Apps
-
-Tide includes client apps for easy gateway discovery and connection.
-
-### Discovery API (Port 9051)
-
-The gateway runs an HTTP API for auto-discovery:
-
-```bash
-# Check gateway status
-curl http://10.101.101.10:9051/status
-
-# Response:
-# {"gateway":"tide","version":"1.0","mode":"killa-whale","security":"hardened",
-#  "tor":"connected","uptime":3600,"ip":"10.101.101.10",
-#  "ports":{"socks":9050,"dns":5353,"api":9051}}
-
-# Get current exit IP
-curl http://10.101.101.10:9051/circuit
-
-# Request new circuit
-curl http://10.101.101.10:9051/newcircuit
-
-# Verify Tor is working
-curl http://10.101.101.10:9051/check
-```
-
-### Python Client (Cross-Platform)
-
-```bash
-# Install dependencies
-pip install requests pystray pillow
-
-# Run
-python client/tide-client.py
-```
-
-Features:
-- System tray icon with Tor status
-- Auto-discovers gateway on local network
-- One-click circuit refresh
-- Shows current exit IP
-
-### macOS Native Client
-
-Build with Xcode or Swift:
-```bash
-swiftc client/macos/TideClient.swift -o TideClient
-./TideClient
-```
-
-Features:
-- Native menu bar app
-- Auto-discovery via Bonjour
-- Click to copy proxy settings
-- Status indicator (🟢 connected / 🔴 offline)
+---
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                        HOST MACHINE                          │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │              Host-Only Network (vmnet)                 │  │
-│  │                                                        │  │
-│  │   ┌────────────┐     ┌────────────┐     ┌──────────┐  │  │
-│  │   │   TIDE     │     │  Client 1  │     │ Client 2 │  │  │
-│  │   │  Gateway   │     │  (Kali)    │     │ (Win11)  │  │  │
-│  │   │            │     │            │     │          │  │  │
-│  │   │ DHCP+DNS   │◀────│ Auto-DHCP  │     │Auto-DHCP │  │  │
-│  │   │ Tor Proxy  │     │            │     │          │  │  │
-│  │   │            │     └────────────┘     └──────────┘  │  │
-│  │   │10.101.101.10│         ▲                   ▲        │  │
-│  │   └──────┬─────┘         │                   │        │  │
-│  │          │               └───────────────────┘        │  │
-│  └──────────┼───────────────────────────────────────────┘  │
-│             │ eth0 (NAT)                                    │
-│             ▼                                               │
-│        [ Tor Network ] ─────────▶ Internet                  │
-└──────────────────────────────────────────────────────────────┘
+Client Devices
+    ↓
+    └─ http://tide.bodegga.net (DNS hijacked)
+        ↓
+    Tide Gateway (10.101.101.10)
+        ├─ Web Dashboard (port 80)
+        ├─ API Endpoint (port 9051)
+        ├─ DHCP Server (dnsmasq)
+        ├─ DNS Hijacking
+        └─ Tor Transparent Proxy
+            ↓
+        Tor Network
+            ↓
+        Internet
 ```
-
-## Building
-
-```bash
-# Docker image
-docker build -t tide .
-
-# VM images (requires QEMU)
-./build-release.sh
-
-# Custom Alpine ISO
-./build-tide-iso.sh
-```
-
-## Files
-
-| File | Purpose |
-|------|---------|
-| `tide-install.sh` | Interactive installer (run from Alpine ISO) |
-| `Dockerfile` | Docker container build |
-| `cloud-init-userdata.yaml` | Cloud-init for qcow2 images |
-| `iptables-leak-proof.rules` | Hardened firewall rules |
-
-## Security Notes
-
-- Default password is `tide` - **change it!**
-- Config files are immutable (`chattr +i`) - use `chattr -i` to modify
-- Takeover mode uses ARP poisoning - **use responsibly**
-- All modes disable IPv6 completely
-
-## License
-
-MIT
 
 ---
 
-**[bodegga/tide](https://github.com/bodegga/tide)** | *Freedom within the shell.* 🌊
+## Project Structure
+
+```
+tide/
+├── README.md                   # This file
+├── LICENSE                     # MIT License
+├── VERSION                     # Current version
+│
+├── docs/                       # Documentation
+│   ├── guides/                 # User guides
+│   ├── development/            # Development docs
+│   ├── CHANGELOG.md            # Version history
+│   ├── ROADMAP.md              # Future plans
+│   └── SECURITY.md             # Security documentation
+│
+├── deployment/                 # Deployment scripts
+│   ├── hetzner/                # Hetzner Cloud (recommended for testing)
+│   ├── parallels/              # Parallels Desktop (macOS)
+│   ├── qemu/                   # QEMU/KVM
+│   └── digitalocean/           # DigitalOcean (future)
+│
+├── scripts/                    # Runtime scripts
+│   ├── runtime/                # Gateway runtime scripts
+│   ├── install/                # Installation scripts
+│   └── build/                  # Build scripts
+│
+├── client/                     # Client applications
+│   ├── macos/                  # Native macOS app
+│   ├── linux/                  # Linux client
+│   └── shared/                 # Shared Python client
+│
+├── config/                     # Configuration templates
+│   ├── torrc-*                 # Tor configurations
+│   └── answerfile              # Alpine auto-install
+│
+└── testing/                    # Testing tools
+    └── MANUAL-TESTING-STEPS.md
+```
+
+---
+
+## Quick Links
+
+- **[Deployment: Hetzner Cloud](deployment/hetzner/test-on-hetzner.sh)** - Automated testing
+- **[Deployment: Parallels](deployment/parallels/ONE-COMMAND-DEPLOY.sh)** - macOS VMs
+- **[Web Dashboard Guide](docs/guides/WEB-DASHBOARD-README.md)** - Dashboard features
+- **[VM Management](docs/guides/VM-MANAGEMENT-GUIDE.md)** - Managing gateway VMs
+- **[Testing Results](docs/development/HETZNER-TEST-RESULTS.md)** - Latest test results
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) file
+
+---
+
+## Links
+
+- **GitHub**: https://github.com/bodegga/tide
+- **Issues**: https://github.com/bodegga/tide/issues
+- **Documentation**: [docs/](docs/)
+
+---
+
+**Tide Gateway - freedom within the shell** 🌊
+
+*v1.2.0 - Web Dashboard Edition*
