@@ -1,0 +1,114 @@
+# Tide Gateway - Test Specification
+# This file defines what SHOULD be tested across all platforms
+# Update this when you add/remove features
+
+version: "1.2.0"
+last_updated: "2024-12-10"
+
+# Core Features (MUST test on all platforms)
+core_features:
+  - name: "CLI Command"
+    description: "tide command is available and responds"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    commands:
+      - "tide --help"
+      - "tide status"
+    
+  - name: "Configuration Files"
+    description: "Mode and security config files exist"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    files:
+      - "/etc/tide/mode"
+      - "/etc/tide/security"
+    
+  - name: "Tor Service"
+    description: "Tor daemon is running"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    processes:
+      - "tor"
+    
+  - name: "Tor Connectivity"
+    description: "Can connect through Tor network"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    tests:
+      - "SOCKS5 proxy on 9050"
+      - "Exit IP validation via check.torproject.org"
+      - "IsTor flag is true"
+    
+  - name: "Mode Switching"
+    description: "Can switch between modes"
+    platforms: ["hetzner", "qemu", "virtualbox"]
+    commands:
+      - "tide mode proxy"
+      - "tide mode router"
+      - "tide mode killa-whale"
+
+# v1.2.0 Features (NEW - must test)
+v1_2_features:
+  - name: "Web Dashboard"
+    description: "Dashboard accessible on port 80"
+    platforms: ["hetzner", "qemu", "virtualbox"]
+    endpoints:
+      - "http://localhost/"
+      - "http://tide.bodegga.net/"
+    checks:
+      - "HTML contains TIDE"
+      - "Shows current mode"
+      - "Shows Tor status"
+    
+  - name: "API Endpoints"
+    description: "JSON API responds"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    endpoints:
+      - "http://localhost:9051/status"
+      - "http://localhost:9051/health"
+    checks:
+      - "Valid JSON response"
+      - "Contains mode field"
+      - "Contains tor_status field"
+    
+  - name: "DNS Hijacking"
+    description: "tide.bodegga.net resolves to gateway"
+    platforms: ["hetzner", "qemu", "virtualbox"]
+    expected_ip: "10.101.101.10"
+    
+  - name: "Enhanced CLI"
+    description: "New CLI commands work"
+    platforms: ["docker", "hetzner", "qemu", "virtualbox"]
+    commands:
+      - "tide status"
+      - "tide check"
+      - "tide circuit"
+      - "tide web"
+      - "tide help"
+
+# Known Limitations (document what CANNOT be tested where)
+limitations:
+  docker:
+    - "Killa Whale Mode - requires kernel ARP access"
+    - "DHCP Server - container networking limitations"
+    - "Web Dashboard port 80 - port conflicts"
+  
+  hetzner:
+    - "None - all features testable"
+  
+  qemu:
+    - "Requires manual Alpine setup first"
+  
+  virtualbox:
+    - "Requires VirtualBox installation"
+    - "Requires manual Alpine setup first"
+
+# Future Features (NOT YET IMPLEMENTED - do not test)
+future_features:
+  - name: "WireGuard VPN"
+    version: "1.3.0"
+    status: "planned"
+    
+  - name: "WebSocket Live Updates"
+    version: "1.3.0"
+    status: "planned"
+    
+  - name: "Bandwidth Monitoring"
+    version: "1.4.0"
+    status: "planned"
