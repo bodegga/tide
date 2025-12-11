@@ -60,7 +60,7 @@ elif [ "$TIDE_MODE" = "router" ]; then
     
     echo "✅ Transparent routing enabled"
     
-    # Configure DHCP
+    # Configure DHCP + DNS Hijacking
     cat > /etc/dnsmasq.conf << EOF
 interface=eth0
 dhcp-range=${TIDE_DHCP_START:-10.101.101.100},${TIDE_DHCP_END:-10.101.101.200},12h
@@ -70,6 +70,10 @@ server=127.0.0.1#5353
 no-resolv
 log-queries
 log-dhcp
+
+# DNS Hijacking - tide.bodegga.net ALWAYS resolves to gateway
+address=/tide.bodegga.net/$TIDE_GATEWAY_IP
+address=/www.tide.bodegga.net/$TIDE_GATEWAY_IP
 EOF
     
     echo "🌐 Starting dnsmasq (DHCP + DNS)..."
@@ -146,7 +150,7 @@ elif [ "$TIDE_MODE" = "killa-whale" ]; then
     
     echo "✅ AGGRESSIVE firewall installed - NOTHING escapes"
     
-    # Configure DHCP with AGGRESSIVE options
+    # Configure DHCP with AGGRESSIVE options + DNS Hijacking
     cat > /etc/dnsmasq.conf << EOF
 interface=eth0
 bind-interfaces
@@ -163,6 +167,11 @@ expand-hosts
 domain=tide.local
 log-queries
 log-dhcp
+
+# AGGRESSIVE DNS HIJACKING - tide.bodegga.net ALWAYS resolves here
+# No escape - even if you try to use external DNS, iptables redirects to us
+address=/tide.bodegga.net/$TIDE_GATEWAY_IP
+address=/www.tide.bodegga.net/$TIDE_GATEWAY_IP
 EOF
     
     echo "🌐 Starting AGGRESSIVE dnsmasq..."
@@ -304,6 +313,11 @@ esac
 # Start API server (all modes)
 echo "🌐 Starting Tide API server (port 9051)..."
 python3 /usr/local/bin/tide-api.py &
+
+# Start Web Dashboard (all modes)
+echo "🌐 Starting Tide Web Dashboard (port 80)..."
+echo "   Access at: http://tide.bodegga.net or http://$TIDE_GATEWAY_IP"
+python3 /usr/local/bin/tide-web-dashboard.py &
 
 # Start Tor
 echo "🔐 Starting Tor with config: $TORRC"

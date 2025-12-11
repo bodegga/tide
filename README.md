@@ -106,15 +106,43 @@ Download from [Releases](https://github.com/bodegga/tide/releases):
 - No IPv6 (disabled)
 - Gateway itself cannot reach clearnet (only Tor process can)
 
-## Commands
+## Web Dashboard
+
+**NEW in v1.2.0:** Web-based status dashboard accessible from any client device!
 
 ```bash
-tide status      # Show mode, Tor status, IP
+# Open browser on any connected client:
+http://tide.bodegga.net
+```
+
+**Features:**
+- 🟢 Real-time Tor connection status
+- 📊 Mode, security profile, uptime
+- 🌍 Current Tor exit IP and country
+- 📱 Connected DHCP clients
+- 🔥 ARP poisoning status (Killa Whale mode)
+- 📡 Network health monitoring
+- ⚡ Auto-refresh every 30 seconds
+
+**How it works:**
+- Tide **hijacks DNS** for `tide.bodegga.net` → always resolves to `10.101.101.10`
+- Works like commercial routers (Ubiquiti: `unifi.ui.com`, Netgear: `routerlogin.net`)
+- **Killa Whale mode:** iptables enforces DNS hijacking - NO ESCAPE 🐋
+
+See [WEB-DASHBOARD-README.md](WEB-DASHBOARD-README.md) for full documentation.
+
+## CLI Commands
+
+```bash
+tide status      # Show full gateway status with colors
 tide check       # Test Tor connectivity
+tide circuit     # Show current Tor exit IP
 tide newcircuit  # Request new Tor circuit
-tide onion       # Show SSH .onion address (if enabled)
-tide takeover    # Activate ARP hijacking (takeover mode)
-tide release     # Stop ARP hijacking
+tide web         # Show dashboard URL
+tide clients     # List connected DHCP clients
+tide arp         # Show ARP poisoning status
+tide logs        # View Tor logs
+tide help        # Show help message
 ```
 
 ## Client Apps
