@@ -11,6 +11,16 @@
 
 ### Features
 
+- [ ] **#19** - Keep WireGuard implementation minimal - Alpine package only, no bloat
+  - **Priority:** Nice-to-have
+  - **Added:** 2025-12-10
+  - **Description:** TODO
+
+- [ ] **#18** - Mobile app (iOS/Android) with WireGuard VPN
+  - **Priority:** important
+  - **Added:** 2025-12-10
+  - **Description:** TODO
+
 - [ ] **#1** - Add bandwidth monitoring dashboard
   - **Priority:** Nice-to-have
   - **Added:** 2025-12-10
@@ -118,9 +128,9 @@
 
 ## 📊 Summary
 
-- **Total Active Ideas:** 17
+- **Total Active Ideas:** 19
 - **Critical:** 2
-- **Important:** 6
+- **Important:** 7
 - **Nice-to-have:** 9
 
 **By Category:**
