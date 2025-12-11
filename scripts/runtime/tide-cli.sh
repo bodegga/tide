@@ -193,21 +193,61 @@ case "$CMD" in
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         ;;
     
+    config|configure)
+        # Launch interactive configuration tool
+        if [ -f /usr/local/bin/tide-config.sh ]; then
+            /usr/local/bin/tide-config.sh "$@"
+        else
+            echo -e "${RED}Configuration tool not found${NC}"
+            echo "Expected: /usr/local/bin/tide-config.sh"
+        fi
+        ;;
+    
+    mode)
+        # Quick mode switch
+        if [ -f /usr/local/bin/tide-config.sh ]; then
+            /usr/local/bin/tide-config.sh mode "$2"
+        else
+            echo -e "${RED}Configuration tool not found${NC}"
+        fi
+        ;;
+    
+    security)
+        # Quick security switch
+        if [ -f /usr/local/bin/tide-config.sh ]; then
+            /usr/local/bin/tide-config.sh security "$2"
+        else
+            echo -e "${RED}Configuration tool not found${NC}"
+        fi
+        ;;
+    
     help|--help|-h)
         echo "🌊 Tide Gateway CLI"
         echo ""
         echo "Usage: tide <command>"
         echo ""
-        echo "Commands:"
+        echo "Status Commands:"
         echo "  status        Show gateway status (default)"
         echo "  check         Verify Tor connectivity"
         echo "  circuit       Show current Tor exit IP"
-        echo "  newcircuit    Request new Tor circuit"
-        echo "  web           Show dashboard URL"
         echo "  clients       List connected DHCP clients"
-        echo "  logs          Show Tor logs"
         echo "  arp           Show ARP poisoning status"
+        echo "  logs          Show Tor logs"
+        echo ""
+        echo "Control Commands:"
+        echo "  config        Interactive configuration menu"
+        echo "  mode <mode>   Quick mode switch (proxy|router|killa-whale|takeover)"
+        echo "  security <p>  Quick security switch (standard|hardened|paranoid|bridges)"
+        echo "  newcircuit    Request new Tor circuit"
+        echo ""
+        echo "Info Commands:"
+        echo "  web           Show dashboard URL"
         echo "  help          Show this help message"
+        echo ""
+        echo "Examples:"
+        echo "  tide config                    # Interactive menu"
+        echo "  tide mode killa-whale          # Quick mode switch"
+        echo "  tide security hardened         # Quick security switch"
         echo ""
         echo "Web Dashboard: http://tide.bodegga.net"
         echo "API Endpoint:  http://10.101.101.10:9051/status"
