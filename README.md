@@ -1,6 +1,8 @@
-# 🌊 Tide Gateway
+<div align="center">
 
-![Tide Gateway Logo](docs/logos/tide-icon-FINAL-half-black.png)
+![Tide Gateway](docs/logos/tide-readme-banner.png)
+
+# Tide Gateway
 
 **Transparent Internet Defense Engine**
 
