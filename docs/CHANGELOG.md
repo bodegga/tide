@@ -45,6 +45,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.3] - 2025-12-10
+
+### Added - CRITICAL SECURITY UPDATE
+- **Zero-Log Privacy Policy** - Comprehensive privacy implementation
+  - No client IP logging (ever)
+  - No request logging in web dashboard
+  - No API call logging
+  - Systemd services output to /dev/null
+  - Created ZERO-LOG-POLICY.md (600+ lines of security documentation)
+  - Philosophy: "If you don't collect it, you can't leak it"
+- **Systemd Service Management**
+  - tide-web.service - Web dashboard on port 80
+  - tide-api.service - API server on port 9051
+  - Auto-start on boot
+  - Proper service dependencies (Tor must start first)
+- **Hetzner Cloud Platform Documentation**
+  - HETZNER-PLATFORM.md - Comprehensive platform guide
+  - Cost analysis: 28-52% cheaper than DigitalOcean
+  - Migration planning for production workloads
+  - Annual testing cost: ~$3/year
+- **Installation Scripts**
+  - install-services.sh - Systemd service installer
+  - Automated service deployment in test environments
+
+### Fixed
+- **Web Dashboard Port 80** - Added CAP_NET_BIND_SERVICE capability
+- **API Version** - Now reads from VERSION file dynamically (was hardcoded)
+- **Zero-Log Violations** - Removed all startup/shutdown logging messages
+- **Service Auto-Start** - Services now properly start via systemd
+- **VERSION File Distribution** - Copied to /opt/tide for runtime version detection
+
+### Changed
+- **Testing Priority** - Hetzner Cloud is now PRIMARY testing platform
+  - Real ARM hardware (not containerized)
+  - Production-realistic environment
+  - Updated GETTING-STARTED.md to reflect priority
+- **Privacy First** - All code reviewed for logging violations
+- **Service Architecture** - Moved from manual startup to systemd management
+
+### Security
+- **ZERO-LOG POLICY ENFORCED**
+  - Web dashboard: No client tracking
+  - API server: No call logging
+  - Systemd: All output to /dev/null
+  - Privacy is not a feature - it's the entire point
+
+### Technical Details
+- **Services verified on:** Hetzner Cloud ARM (Ubuntu 22.04)
+- **Test results:** All core functionality working
+- **Version format:** Semantic versioning (MAJOR.MINOR.PATCH)
+- **Git commits as builds:** Development between releases tracked via git
+
+### Breaking Changes
+None - Fully backwards compatible with v1.1.2
+
+---
+
 ## [1.1.2] - 2025-12-10
 
 ### Added
