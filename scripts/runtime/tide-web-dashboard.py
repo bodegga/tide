@@ -473,12 +473,11 @@ def main():
     socketserver.TCPServer.allow_reuse_address = True
     
     with socketserver.TCPServer(("", PORT), TideWebHandler) as httpd:
-        print(f"🌊 Tide Web Dashboard running on port {PORT}")
-        print(f"   Access at: http://tide.bodegga.net or http://10.101.101.10")
+        # ZERO-LOG: No startup messages
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\n✋ Stopping web dashboard...")
+            pass  # ZERO-LOG: No shutdown messages
 
 
 if __name__ == "__main__":
