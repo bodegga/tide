@@ -1,0 +1,13 @@
+{
+  "server": "cax11",
+  "image": "ubuntu-22.04",
+  "timestamp": "20251211-002323",
+  "status": "FAIL",
+  "duration_seconds": 2,
+  "tests": {
+    "passed": 1,
+    "failed": 0
+0
+  },
+  "specs": "ARM-Dedicated,2vCPU,4GB"
+}

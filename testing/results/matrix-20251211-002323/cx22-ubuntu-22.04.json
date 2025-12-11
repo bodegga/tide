@@ -1,0 +1,13 @@
+{
+  "server": "cx22",
+  "image": "ubuntu-22.04",
+  "timestamp": "20251211-002323",
+  "status": "FAIL",
+  "duration_seconds": 2,
+  "tests": {
+    "passed": 1,
+    "failed": 0
+0
+  },
+  "specs": "x86,2vCPU,4GB"
+}
