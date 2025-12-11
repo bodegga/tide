@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/logos/tide-icon-from-website.png" alt="Tide Gateway" width="200"/>
+<img src="docs/logos/tide-icon-rounded-corners.png" alt="Tide Gateway" width="200" style="border-radius: 15%;"/>
 
 # Tide Gateway
 
