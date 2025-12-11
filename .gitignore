@@ -13,6 +13,8 @@ cidata/
 # Large binary files (download separately or use git-lfs)
 *.qcow2
 *.vhd
+*.vhdx
+*.vdi
 *.vmdk
 *.iso
 *.img
@@ -22,10 +24,24 @@ cidata/
 *.ovf
 *.mf
 *.vmx
+*.pvm
 *.tar.gz
 
-# Keep release folder tracked via exception below
-!release/
+# Release artifacts (too large for git)
+release/**/*.qcow2
+release/**/*.vhdx
+release/**/*.vdi
+release/**/*.vmdk
+release/**/*.ova
+release/**/*.raw
+release/**/*.pvm
+release/**/*.tar.gz
+release/**/*.iso
+
+# Keep release README files and checksums
+!release/**/README.md
+!release/**/RELEASE-NOTES.md
+!release/**/*.sha256
 
 # Test files
 test-*.qcow2
