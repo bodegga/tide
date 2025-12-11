@@ -75,3 +75,18 @@ build/
 
 # Private development notes (local only)
 IDEAS.md
+
+# Hetzner API tokens (NEVER commit)
+**/hetzner.env
+**/*token*.txt
+**/*secret*.txt
+
+# SSH keys (NEVER commit)
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+!**/*.pub
+
+# Session notes with potentially sensitive info
+**/PRIVATE-*.md
