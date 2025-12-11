@@ -19,6 +19,16 @@ from urllib.parse import urlparse
 
 PORT = 8080  # Internal port (nginx proxies 80 → 8080)
 
+def get_version():
+    """Get Tide version from VERSION file"""
+    try:
+        with open('/opt/tide/VERSION', 'r') as f:
+            return f.read().strip()
+    except:
+        return "unknown"
+
+VERSION = get_version()
+
 
 class TideWebHandler(http.server.BaseHTTPRequestHandler):
     """Handle web dashboard requests"""
@@ -422,7 +432,7 @@ class TideWebHandler(http.server.BaseHTTPRequestHandler):
         </div>
         
         <div class="footer">
-            <p>Tide Gateway v1.2.0 • <a href="https://github.com/bodegga/tide" style="color: #666;">github.com/bodegga/tide</a></p>
+            <p>Tide Gateway v{VERSION} • <a href="https://github.com/bodegga/tide" style="color: #666;">github.com/bodegga/tide</a></p>
             <p style="margin-top: 5px;">Access this dashboard at <strong>http://tide.bodegga.net</strong> or <strong>http://10.101.101.10</strong></p>
         </div>
     </div>
@@ -452,7 +462,7 @@ class TideWebHandler(http.server.BaseHTTPRequestHandler):
             
             self._send_json(200, {
                 "gateway": "tide",
-                "version": "1.2.0",
+                "version": VERSION,
                 "mode": self._get_mode(),
                 "security": self._get_security(),
                 "tor": tor_status,

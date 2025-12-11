@@ -1,6 +1,6 @@
 #!/bin/bash
 # Automated Tide Gateway Testing on Hetzner Cloud
-# Creates ARM server, installs Tide v1.2.0, runs tests, destroys server
+# Creates ARM server, installs Tide from GitHub, runs tests, destroys server
 
 set -e
 
@@ -92,14 +92,14 @@ echo -e "${GREEN}✓ SSH ready${NC}"
 echo ""
 
 # Install Tide
-echo -e "${CYAN}[4/6] Installing Tide Gateway v1.2.0...${NC}"
+echo -e "${CYAN}[4/6] Installing Tide Gateway (from GitHub)...${NC}"
 
 ssh -o StrictHostKeyChecking=no root@"$SERVER_IP" bash << 'EOFINSTALL'
 set -e
 
 echo "→ Updating system..."
 apt-get update -qq
-apt-get install -y curl git python3 python3-pip tor iptables dnsmasq nmap iputils-arping netcat-openbsd >/dev/null 2>&1
+apt-get install -y curl git python3 python3-pip tor iptables dnsmasq nmap iputils-arping netcat-openbsd nginx-light >/dev/null 2>&1
 
 echo "→ Creating Tide config..."
 mkdir -p /etc/tide
@@ -123,15 +123,21 @@ cp scripts/runtime/tide-config.sh /usr/local/bin/
 chmod +x /usr/local/bin/tide-*.sh
 ln -sf /usr/local/bin/tide-cli.sh /usr/local/bin/tide
 
+echo "→ Configuring nginx..."
+cp config/nginx/tide-dashboard.conf /etc/nginx/sites-available/
+ln -sf /etc/nginx/sites-available/tide-dashboard.conf /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+
 echo "→ Installing systemd services..."
 cp config/systemd/tide-web.service /etc/systemd/system/
 cp config/systemd/tide-api.service /etc/systemd/system/
 systemctl daemon-reload
 
 echo "→ Enabling and starting services..."
-systemctl enable tide-web tide-api tor
+systemctl enable nginx tide-web tide-api tor
 systemctl start tor
 sleep 5  # Let Tor start
+systemctl restart nginx
 systemctl start tide-web tide-api
 
 echo "✓ Tide Gateway installed and services started"
@@ -175,6 +181,7 @@ echo ""
 # Test 3: Services running
 echo "✓ TEST 3: Services Running"
 pgrep -x tor >/dev/null && echo "  ✓ Tor running" || echo "  ✗ Tor not running"
+pgrep -x nginx >/dev/null && echo "  ✓ nginx running" || echo "  ✗ nginx not running"
 pgrep -f tide-web-dashboard >/dev/null && echo "  ✓ Web dashboard running" || echo "  ✗ Web dashboard not running"
 pgrep -f tide-api >/dev/null && echo "  ✓ API server running" || echo "  ✗ API server not running"
 # Note: dnsmasq only needed for router/killa-whale DHCP modes (not installed by default)
