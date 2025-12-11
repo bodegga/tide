@@ -11,7 +11,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client GUI applications (native desktop apps)
 - Advanced ARP takeover mode refinements
 - Bridge relay support for censored regions
-- Web-based administration interface
+- Interactive circuit control (select exit country)
+- Bandwidth usage graphs
+- WebSocket live updates
+
+---
+
+## [1.2.0] - 2025-12-10
+
+### Added
+- **Web Dashboard** - Full-featured status interface at http://tide.bodegga.net
+  - Real-time Tor connection status with visual indicators
+  - Mode, security profile, and uptime display
+  - Current Tor exit IP and country information
+  - Connected DHCP clients counter
+  - ARP poisoning status (Killa Whale mode)
+  - Network health monitoring
+  - Auto-refresh every 30 seconds
+  - Mobile-responsive dark theme UI
+- **Aggressive DNS Hijacking** - tide.bodegga.net ALWAYS resolves to 10.101.101.10
+  - dnsmasq configuration with address hijacking
+  - iptables enforcement in Killa Whale mode (no escape)
+  - Works like commercial routers (Ubiquiti, Netgear approach)
+- **Enhanced CLI Tool** - Comprehensive `tide` command
+  - `tide status` - Full gateway status with colored output
+  - `tide check` - Verify Tor connectivity
+  - `tide circuit` - Show current exit IP and country
+  - `tide newcircuit` - Request new Tor circuit
+  - `tide clients` - List connected DHCP clients
+  - `tide arp` - Show ARP poisoning status
+  - `tide logs` - View Tor logs
+  - `tide web` - Show dashboard URL
+  - `tide help` - Command reference
+- **Network Health Monitoring**
+  - Connected client tracking
+  - ARP poisoning process monitoring
+  - Network scanner status
+  - Real-time statistics
+- **JSON API Enhancements**
+  - `/api/status` - Full gateway status endpoint
+  - `/health` - Simple health check
+  - Enhanced circuit information
+  - Network statistics included
+
+### Changed
+- **gateway-start.sh** - Now starts web dashboard server on port 80
+- **dnsmasq configuration** - Added DNS hijacking for tide.bodegga.net
+- **README.md** - Added Web Dashboard section with usage examples
+- Service startup order optimized for dashboard availability
+
+### Technical Details
+- **Web Server**: Python3 http.server (lightweight, no dependencies)
+- **Dashboard Port**: 80 (HTTP)
+- **API Port**: 9051 (JSON endpoints)
+- **DNS Hijacking**: dnsmasq `address=/tide.bodegga.net/10.101.101.10`
+- **Killa Whale Enforcement**: iptables redirects all DNS to gateway
+- **CLI Tool**: Shell script with ANSI color support
+- **Auto-refresh**: JavaScript 30-second interval
+
+### Documentation
+- New file: `WEB-DASHBOARD-README.md` - Complete dashboard guide
+- New file: `UPDATE-TO-V1.2.sh` - Upgrade script for existing deployments
+- Updated: `README.md` with web dashboard section
+
+### Upgrade Path
+For existing v1.1.x deployments:
+```bash
+wget -O- https://raw.githubusercontent.com/bodegga/tide/main/UPDATE-TO-V1.2.sh | sh
+```
 
 ---
 
