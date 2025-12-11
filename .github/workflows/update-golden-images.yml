@@ -1,0 +1,52 @@
+name: Update Golden Images
+
+# Auto-refresh snapshots monthly to keep packages up-to-date
+on:
+  schedule:
+    # Run at 3 AM on the 1st of every month
+    - cron: '0 3 1 * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install hcloud CLI
+        run: |
+          wget -q https://github.com/hetznercloud/cli/releases/latest/download/hcloud-linux-amd64.tar.gz
+          tar -xzf hcloud-linux-amd64.tar.gz
+          sudo mv hcloud /usr/local/bin/
+          hcloud version
+      
+      - name: Setup Hetzner credentials
+        run: |
+          mkdir -p ~/.config/tide
+          echo "HETZNER_TIDE_TOKEN=${{ secrets.HETZNER_TIDE_TOKEN }}" > ~/.config/tide/hetzner.env
+      
+      - name: Create golden images
+        run: |
+          cd testing/cloud
+          chmod +x create-golden-images.sh
+          ./create-golden-images.sh <<< "y"
+      
+      - name: Save snapshot IDs as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: golden-images-config
+          path: ~/.config/tide/golden-images.env
+      
+      - name: Create summary
+        run: |
+          echo "## ✅ Golden Images Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Snapshot IDs:" >> $GITHUB_STEP_SUMMARY
+          cat ~/.config/tide/golden-images.env | grep "GOLDEN_" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Cost: ~€0.10/month" >> $GITHUB_STEP_SUMMARY
+          echo "Next update: $(date -d '+1 month' +'%Y-%m-%d')" >> $GITHUB_STEP_SUMMARY
