@@ -2,7 +2,7 @@
 set -e
 
 VM_NAME="Tide-Killa-Whale"
-ISO_PATH="/Users/abiasi/Documents/Personal-Projects/tide/alpine-virt-3.21.0-aarch64.iso"
+ISO_PATH="/path/to/tide/alpine-virt-3.21.0-aarch64.iso"
 
 echo "🐋 Killa Whale - Parallels Deployment v2"
 echo "========================================="

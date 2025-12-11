@@ -15,7 +15,7 @@ jobs:
       - name: Check for files in root
         run: |
           # Allowed files in root
-          ALLOWED="README.md START-HERE.md LICENSE VERSION .gitignore tide-install.sh .git .github alpine-virt-3.21.0-aarch64.iso alpine-standard-3.21.0-aarch64.iso README-icon.png IDEAS.md .env .env.example"
+          ALLOWED="README.md START-HERE.md LICENSE VERSION .gitignore tide-install.sh .git .github alpine-virt-3.21.0-aarch64.iso alpine-standard-3.21.0-aarch64.iso README-icon.png .env .env.example"
           
           # Get all files in root (not directories)
           ROOT_FILES=$(ls -1 | grep -v "^\.git" || true)

@@ -18,10 +18,30 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 IDEAS_FILE="$PROJECT_ROOT/IDEAS.md"
 
-# Ensure IDEAS.md exists
+# Ensure IDEAS.md exists (create if missing)
 if [[ ! -f "$IDEAS_FILE" ]]; then
-    echo -e "${RED}ERROR: IDEAS.md not found at $IDEAS_FILE${NC}"
-    exit 1
+    echo -e "${YELLOW}Creating IDEAS.md (private, local only)...${NC}"
+    cat > "$IDEAS_FILE" << 'EOF'
+# Tide Gateway - Development Ideas
+
+**Status:** Private development notes (not tracked in git)  
+**Purpose:** Quick capture of ideas, features, and improvements
+
+---
+
+## Active Ideas
+
+<!-- Ideas will be added here automatically by ./scripts/utils/idea -->
+
+---
+
+## Completed Ideas
+
+<!-- Completed ideas move here automatically -->
+
+EOF
+    echo -e "${GREEN}✓ Created IDEAS.md${NC}"
+    echo ""
 fi
 
 # Helper functions

@@ -56,3 +56,6 @@ ENV/
 dist/
 build/
 *.egg-info/
+
+# Private development notes (local only)
+IDEAS.md
